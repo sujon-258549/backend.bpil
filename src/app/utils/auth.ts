@@ -80,73 +80,7 @@ const auth = (...requiredRoles: UserRoleValue[]) => {
       mobile: existingUser.mobile ?? "",
     };
 
-    // Tenant context resolution
-    const headerBranchId = req.headers["x-branch-id"];
-    const headerSubBranchId = req.headers["x-sub-branch-id"];
-    const isPlatformAdmin =
-      userRoleString === USER_ROLE.SUPER_ADMIN ||
-      userRoleString === USER_ROLE.ADMIN;
-
-    const requestedBranchId = Array.isArray(headerBranchId)
-      ? headerBranchId[0]
-      : headerBranchId;
-    const requestedSubBranchId = Array.isArray(headerSubBranchId)
-      ? headerSubBranchId[0]
-      : headerSubBranchId;
-
-    if (requestedBranchId) {
-      if (!isPlatformAdmin) {
-        const branch = await prisma.mainBranch.findFirst({
-          where: {
-            id: requestedBranchId,
-            isDeleted: false,
-            OR: [
-              { ownerId: existingUser.id },
-              { employees: { some: { id: existingUser.id } } },
-            ],
-          },
-        });
-        if (!branch) {
-          throw new ApiError(
-            status.FORBIDDEN,
-            "🔍❓ Forbidden: No access to this branch",
-          );
-        }
-      }
-      req.branchId = requestedBranchId;
-    } else if (!isPlatformAdmin) {
-      // Fall back to user's own branch membership
-      if (existingUser.branchId) {
-        req.branchId = existingUser.branchId;
-      }
-    }
-
-    if (requestedSubBranchId) {
-      if (!isPlatformAdmin) {
-        if (!req.branchId) {
-          throw new ApiError(
-            status.FORBIDDEN,
-            "🔍❓ Forbidden: Branch context required for sub-branch access",
-          );
-        }
-        const subBranch = await prisma.subBranch.findFirst({
-          where: {
-            id: requestedSubBranchId,
-            isDeleted: false,
-            branchId: req.branchId,
-          },
-        });
-        if (!subBranch) {
-          throw new ApiError(
-            status.FORBIDDEN,
-            "🔍❓ Forbidden: No access to this sub-branch",
-          );
-        }
-      }
-      req.subBranchId = requestedSubBranchId;
-    } else if (!isPlatformAdmin && existingUser.subBranchId) {
-      req.subBranchId = existingUser.subBranchId;
-    }
+    // Tenant context resolution removed for single project mode.
 
     next();
   });

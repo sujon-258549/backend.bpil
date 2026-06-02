@@ -1,15 +1,16 @@
+import { type ActorContext } from "../../utils/tenant.ts";
 export declare const RoleServices: {
-    createRole: (payload: any) => Promise<{
-        role: string;
+    createRole: (payload: any, actor?: ActorContext) => Promise<{
+        role: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    getAllRole: (query: any) => Promise<{
+    getAllRole: (query: any, actor?: ActorContext) => Promise<{
         data: {
-            role: string;
+            role: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
@@ -22,27 +23,27 @@ export declare const RoleServices: {
             total: number;
         };
     }>;
-    getRoleById: (id: string) => Promise<{
-        role: string;
+    getRoleById: (id: string, actor?: ActorContext) => Promise<{
+        role: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    updateRole: (id: string, payload: any) => Promise<{
-        role: string;
+    updateRole: (id: string, payload: any, actor?: ActorContext) => Promise<{
+        role: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    deleteRole: (id: string) => Promise<{
+    deleteRole: (id: string, actor?: ActorContext) => Promise<{
         message: string;
     }>;
-    updateRoleStatus: (id: string) => Promise<{
-        role: string;
+    updateRoleStatus: (id: string, actor?: ActorContext) => Promise<{
+        role: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;

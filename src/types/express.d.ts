@@ -9,8 +9,6 @@ declare global {
         role: IUserRole;
         mobile?: string;
       };
-      branchId?: string;
-      subBranchId?: string;
     }
   }
 }

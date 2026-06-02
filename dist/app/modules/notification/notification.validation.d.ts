@@ -5,8 +5,6 @@ export declare const NotificationValidation: {
             userId: z.ZodString;
             type: z.ZodString;
             message: z.ZodString;
-            jobId: z.ZodOptional<z.ZodString>;
-            applicationId: z.ZodOptional<z.ZodString>;
         }, z.core.$strip>;
     }, z.core.$strip>;
     updateNotificationZodSchema: z.ZodObject<{

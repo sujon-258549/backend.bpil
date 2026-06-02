@@ -4,34 +4,32 @@ export declare const AuthServices: {
         refreshToken: never;
         user: {
             id: string;
-            email: string;
-            mobile: string;
+            email: string | null;
+            mobile: string | null;
             name: string | null | undefined;
-            photo: string | undefined;
-            role: string | undefined;
-            gender: import("@prisma/client").$Enums.Gender | null | undefined;
-            bloodGroup: import("@prisma/client").$Enums.BloodGroup | null | undefined;
+            photo: string | null | undefined;
+            role: string | null | undefined;
+            gender: import("../../../generated/prisma/index.js").$Enums.Gender | null | undefined;
+            bloodGroup: import("../../../generated/prisma/index.js").$Enums.BloodGroup | null | undefined;
             age: number | null | undefined;
             designation: string | null | undefined;
-            department: string | undefined;
+            department: string | null | undefined;
             address: {
-                mobile: string;
-                address: string | null;
+                mobile: string | null;
                 id: string;
+                address: string | null;
                 division: string | null;
                 district: string | null;
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: string[] | undefined;
-                workTypes: string[] | undefined;
-                mobile?: string;
+                subCategories: (string | null)[] | undefined;
+                mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
-                workType?: string | null;
                 id?: string;
-                passwordChangeTime?: Date | null;
                 passwordChanged?: boolean;
+                passwordChangeTime?: Date | null;
                 experience?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
@@ -42,6 +40,7 @@ export declare const AuthServices: {
             isVerified: boolean;
             isBlocked: false;
             isDeleted: false;
+            permissions: import("../../utils/userPermissions.ts").PermissionRow[];
         };
         isLogin: boolean;
     }>;
@@ -49,34 +48,32 @@ export declare const AuthServices: {
         accessToken: never;
         user: {
             id: string;
-            email: string;
-            mobile: string;
+            email: string | null;
+            mobile: string | null;
             name: string | null | undefined;
-            photo: string | undefined;
-            role: string | undefined;
-            gender: import("@prisma/client").$Enums.Gender | null | undefined;
-            bloodGroup: import("@prisma/client").$Enums.BloodGroup | null | undefined;
+            photo: string | null | undefined;
+            role: string | null | undefined;
+            gender: import("../../../generated/prisma/index.js").$Enums.Gender | null | undefined;
+            bloodGroup: import("../../../generated/prisma/index.js").$Enums.BloodGroup | null | undefined;
             age: number | null | undefined;
             designation: string | null | undefined;
-            department: string | undefined;
+            department: string | null | undefined;
             address: {
-                mobile: string;
-                address: string | null;
+                mobile: string | null;
                 id: string;
+                address: string | null;
                 division: string | null;
                 district: string | null;
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: string[] | undefined;
-                workTypes: string[] | undefined;
-                mobile?: string;
+                subCategories: (string | null)[] | undefined;
+                mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
-                workType?: string | null;
                 id?: string;
-                passwordChangeTime?: Date | null;
                 passwordChanged?: boolean;
+                passwordChangeTime?: Date | null;
                 experience?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
@@ -87,6 +84,7 @@ export declare const AuthServices: {
             isVerified: boolean;
             isBlocked: boolean;
             isDeleted: boolean;
+            permissions: import("../../utils/userPermissions.ts").PermissionRow[];
         };
     }>;
     forgotPassword: (payload: {
@@ -99,34 +97,32 @@ export declare const AuthServices: {
         refreshToken: never;
         user: {
             id: string;
-            email: string;
-            mobile: string;
+            email: string | null;
+            mobile: string | null;
             name: string | null | undefined;
-            photo: string | undefined;
-            role: string | undefined;
-            gender: import("@prisma/client").$Enums.Gender | null | undefined;
-            bloodGroup: import("@prisma/client").$Enums.BloodGroup | null | undefined;
+            photo: string | null | undefined;
+            role: string | null | undefined;
+            gender: import("../../../generated/prisma/index.js").$Enums.Gender | null | undefined;
+            bloodGroup: import("../../../generated/prisma/index.js").$Enums.BloodGroup | null | undefined;
             age: number | null | undefined;
             designation: string | null | undefined;
-            department: string | undefined;
+            department: string | null | undefined;
             address: {
-                mobile: string;
-                address: string | null;
+                mobile: string | null;
                 id: string;
+                address: string | null;
                 division: string | null;
                 district: string | null;
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: string[] | undefined;
-                workTypes: string[] | undefined;
-                mobile?: string;
+                subCategories: (string | null)[] | undefined;
+                mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
-                workType?: string | null;
                 id?: string;
-                passwordChangeTime?: Date | null;
                 passwordChanged?: boolean;
+                passwordChangeTime?: Date | null;
                 experience?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;

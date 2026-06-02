@@ -87,7 +87,7 @@ const create${capName}IntoDB = async (payload: any, actor: ActorContext) => {
   const result = await prisma.${prismaModel}.create({
     data: {
       ...payload,
-      branchId: actor.branchId ?? null,
+      
     },
   });
   return result;
@@ -112,8 +112,7 @@ const getAll${capName} = async (query: any, actor: ActorContext) => {
   const where: Prisma.${capName}WhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...filter,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.${prismaModel}.findMany({
     where,
@@ -133,7 +132,7 @@ const getAll${capName} = async (query: any, actor: ActorContext) => {
 const get${capName}ById = async (id: string, actor: ActorContext) => {
   const result = await prisma.${prismaModel}.findUnique({ where: { id } });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "${capName} not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -144,7 +143,7 @@ const update${capName} = async (
 ) => {
   const existing = await prisma.${prismaModel}.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "${capName} not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.${prismaModel}.update({
     where: { id },
@@ -156,7 +155,7 @@ const update${capName} = async (
 const delete${capName} = async (id: string, actor: ActorContext) => {
   const existing = await prisma.${prismaModel}.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "${capName} not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.${prismaModel}.delete({ where: { id } });
   return result;
@@ -165,7 +164,7 @@ const delete${capName} = async (id: string, actor: ActorContext) => {
 const update${capName}Status = async (id: string, actor: ActorContext) => {
   const existing = await prisma.${prismaModel}.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "${capName} not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.${prismaModel}.update({
     where: { id },
@@ -366,3 +365,4 @@ if (!moduleName) {
 }
 
 createModule(moduleName);
+

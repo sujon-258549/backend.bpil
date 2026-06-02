@@ -1,30 +1,31 @@
+import { type ActorContext } from "../../utils/tenant.ts";
 export declare const SubCategoryServices: {
-    createSubCategory: (payload: any) => Promise<{
-        name: string;
+    createSubCategory: (payload: any, actor?: ActorContext) => Promise<{
+        name: string | null;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
-        slug: string;
+        slug: string | null;
         status: boolean;
-        categoryId: string;
+        categoryId: string | null;
         icon: string | null;
     }>;
-    getAllSubCategory: (query: any) => Promise<{
+    getAllSubCategory: (query: any, actor?: ActorContext) => Promise<{
         data: ({
             category: {
-                name: string;
-                slug: string;
-            };
+                name: string | null;
+                slug: string | null;
+            } | null;
         } & {
-            name: string;
+            name: string | null;
             createdAt: Date;
             updatedAt: Date;
             id: string;
             description: string | null;
-            slug: string;
+            slug: string | null;
             status: boolean;
-            categoryId: string;
+            categoryId: string | null;
             icon: string | null;
         })[];
         meta: {
@@ -33,63 +34,63 @@ export declare const SubCategoryServices: {
             total: number;
         };
     }>;
-    getSubCategoryById: (id: string) => Promise<{
+    getSubCategoryById: (id: string, actor?: ActorContext) => Promise<{
         category: {
-            name: string;
+            name: string | null;
             id: string;
-            slug: string;
-        };
+            slug: string | null;
+        } | null;
     } & {
-        name: string;
+        name: string | null;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
-        slug: string;
+        slug: string | null;
         status: boolean;
-        categoryId: string;
+        categoryId: string | null;
         icon: string | null;
     }>;
     getSubCategoryBySlug: (slug: string) => Promise<{
         category: {
-            name: string;
+            name: string | null;
             id: string;
-            slug: string;
-        };
+            slug: string | null;
+        } | null;
     } & {
-        name: string;
+        name: string | null;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
-        slug: string;
+        slug: string | null;
         status: boolean;
-        categoryId: string;
+        categoryId: string | null;
         icon: string | null;
     }>;
-    updateSubCategory: (id: string, payload: any) => Promise<{
-        name: string;
+    updateSubCategory: (id: string, payload: any, actor?: ActorContext) => Promise<{
+        name: string | null;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
-        slug: string;
+        slug: string | null;
         status: boolean;
-        categoryId: string;
+        categoryId: string | null;
         icon: string | null;
     }>;
-    deleteSubCategory: (id: string) => Promise<{
+    deleteSubCategory: (id: string, actor?: ActorContext) => Promise<{
         message: string;
     }>;
-    updateSubCategoryStatus: (id: string) => Promise<{
-        name: string;
+    updateSubCategoryStatus: (id: string, actor?: ActorContext) => Promise<{
+        name: string | null;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
-        slug: string;
+        slug: string | null;
         status: boolean;
-        categoryId: string;
+        categoryId: string | null;
         icon: string | null;
     }>;
 };

@@ -16,7 +16,7 @@ const createComment = async (
     data: {
       ...payload,
       userId,
-      branchId: actor.branchId ?? null,
+      
     },
     include: {
       user: { include: { profile: true } },
@@ -44,8 +44,7 @@ const getAllComments = async (query: any, actor: ActorContext) => {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...queryFilter,
     isDeleted: false,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.comment.findMany({
     where,
@@ -69,7 +68,7 @@ const getCommentById = async (id: string, actor: ActorContext) => {
     include: { user: { include: { profile: true } } },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Comment not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -80,7 +79,7 @@ const updateComment = async (
 ) => {
   const isExist = await prisma.comment.findUnique({ where: { id } });
   if (!isExist) throw new ApiError(httpStatus.NOT_FOUND, "Comment not found");
-  assertTenantAccess(actor, isExist.branchId);
+
 
   const result = await prisma.comment.update({ where: { id }, data: payload });
   return result;
@@ -89,7 +88,7 @@ const updateComment = async (
 const deleteComment = async (id: string, actor: ActorContext) => {
   const isExist = await prisma.comment.findUnique({ where: { id } });
   if (!isExist) throw new ApiError(httpStatus.NOT_FOUND, "Comment not found");
-  assertTenantAccess(actor, isExist.branchId);
+
 
   await prisma.comment.update({
     where: { id },
@@ -106,3 +105,4 @@ export const CommentServices = {
   updateComment,
   deleteComment,
 };
+

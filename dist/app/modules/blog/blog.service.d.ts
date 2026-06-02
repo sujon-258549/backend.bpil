@@ -1,37 +1,38 @@
+import type { ActorContext } from "../../utils/tenant.ts";
 export declare const BlogServices: {
-    createBlog: (payload: any) => Promise<{
+    createBlog: (payload: any, actor: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
         id: string;
+        category: string | null;
         description: string | null;
-        slug: string;
-        title: string;
-        tags: string[];
-        isPublished: boolean;
+        slug: string | null;
+        title: string | null;
         excerpt: string | null;
         authorName: string | null;
+        tags: string[];
+        isPublished: boolean;
         authorId: string | null;
-        content: string;
+        content: string | null;
         coverImage: string | null;
         authorImage: string | null;
         publishedAt: Date | null;
     }>;
-    getAllBlog: (query: any) => Promise<{
+    getAllBlog: (query: any, actor: ActorContext) => Promise<{
         data: {
             createdAt: Date;
             updatedAt: Date;
-            category: string | null;
             id: string;
+            category: string | null;
             description: string | null;
-            slug: string;
-            title: string;
-            tags: string[];
-            isPublished: boolean;
+            slug: string | null;
+            title: string | null;
             excerpt: string | null;
             authorName: string | null;
+            tags: string[];
+            isPublished: boolean;
             authorId: string | null;
-            content: string;
+            content: string | null;
             coverImage: string | null;
             authorImage: string | null;
             publishedAt: Date | null;
@@ -42,59 +43,59 @@ export declare const BlogServices: {
             total: number;
         };
     }>;
-    getBlogById: (id: string) => Promise<{
+    getBlogById: (id: string, actor: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
         id: string;
+        category: string | null;
         description: string | null;
-        slug: string;
-        title: string;
-        tags: string[];
-        isPublished: boolean;
+        slug: string | null;
+        title: string | null;
         excerpt: string | null;
         authorName: string | null;
+        tags: string[];
+        isPublished: boolean;
         authorId: string | null;
-        content: string;
+        content: string | null;
         coverImage: string | null;
         authorImage: string | null;
         publishedAt: Date | null;
     }>;
-    updateBlog: (id: string, payload: any) => Promise<{
+    updateBlog: (id: string, payload: any, actor: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
         id: string;
+        category: string | null;
         description: string | null;
-        slug: string;
-        title: string;
-        tags: string[];
-        isPublished: boolean;
+        slug: string | null;
+        title: string | null;
         excerpt: string | null;
         authorName: string | null;
+        tags: string[];
+        isPublished: boolean;
         authorId: string | null;
-        content: string;
+        content: string | null;
         coverImage: string | null;
         authorImage: string | null;
         publishedAt: Date | null;
     }>;
-    deleteBlog: (id: string) => Promise<{
+    deleteBlog: (id: string, actor: ActorContext) => Promise<{
         message: string;
     }>;
-    updateBlogStatus: (id: string) => Promise<{
+    updateBlogStatus: (id: string, actor: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
         id: string;
+        category: string | null;
         description: string | null;
-        slug: string;
-        title: string;
-        tags: string[];
-        isPublished: boolean;
+        slug: string | null;
+        title: string | null;
         excerpt: string | null;
         authorName: string | null;
+        tags: string[];
+        isPublished: boolean;
         authorId: string | null;
-        content: string;
+        content: string | null;
         coverImage: string | null;
         authorImage: string | null;
         publishedAt: Date | null;

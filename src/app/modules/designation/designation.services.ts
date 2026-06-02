@@ -19,14 +19,13 @@ const createDesignation = async (payload: any, actor?: ActorContext) => {
   // Force-scope to caller's branch for non-platform users.
   const branchId =
     actor && !isPlatformAdmin(actor.role)
-      ? (actor.branchId ?? null)
-      : (payload.branchId ?? null);
+      ? null : null;
 
   const slug = payload.slug || slugCreate(payload.name);
 
   const exists = await prisma.designation.findFirst({
     where: {
-      branchId,
+      
       OR: [{ name: payload.name }, { slug }],
     },
   });
@@ -40,7 +39,7 @@ const createDesignation = async (payload: any, actor?: ActorContext) => {
       slug,
       description: payload.description,
       isActive: payload.isActive ?? true,
-      branchId,
+      
     },
   });
   return result;
@@ -74,7 +73,7 @@ const getAllDesignations = async (query: any, actor?: ActorContext) => {
   // Tenant scoping — non-platform users see only their branch's
   // designations.
   if (actor && !isPlatformAdmin(actor.role)) {
-    andCondition.push({ branchId: actor.branchId ?? null });
+    
   }
 
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
@@ -101,7 +100,7 @@ const getAllDesignations = async (query: any, actor?: ActorContext) => {
 const getDesignationById = async (id: string, actor?: ActorContext) => {
   const result = await prisma.designation.findUnique({ where: { id } });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Designation not found");
-  if (actor) assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -113,11 +112,11 @@ const updateDesignation = async (
   const existing = await prisma.designation.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Designation not found");
   if (actor) {
-    assertTenantAccess(actor, existing.branchId);
+
     if (
       !isPlatformAdmin(actor.role) &&
       payload.branchId &&
-      payload.branchId !== existing.branchId
+      payload.branchId !== null
     ) {
       throw new ApiError(
         httpStatus.FORBIDDEN,
@@ -141,7 +140,7 @@ const updateDesignation = async (
 const deleteDesignation = async (id: string, actor?: ActorContext) => {
   const existing = await prisma.designation.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Designation not found");
-  if (actor) assertTenantAccess(actor, existing.branchId);
+
 
   await prisma.designation.delete({ where: { id } });
   return { message: "Designation deleted successfully" };
@@ -150,7 +149,7 @@ const deleteDesignation = async (id: string, actor?: ActorContext) => {
 const updateDesignationStatus = async (id: string, actor?: ActorContext) => {
   const existing = await prisma.designation.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Designation not found");
-  if (actor) assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.designation.update({
     where: { id },

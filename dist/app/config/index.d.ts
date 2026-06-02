@@ -18,6 +18,18 @@ declare const _default: {
         ssl_payment_url: string;
         validate_api: string;
     };
+    email: {
+        host: string;
+        port: number;
+        user: string;
+        pass: string;
+        from: string;
+    };
+    superAdmin: {
+        email: string;
+        password: string;
+        mobile: string;
+    };
 };
 export default _default;
 //# sourceMappingURL=index.d.ts.map

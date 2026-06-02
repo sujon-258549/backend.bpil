@@ -28,11 +28,10 @@ const createRole = async (payload: any, actor?: ActorContext) => {
   }
   const branchId =
     actor && !isPlatformAdmin(actor.role)
-      ? (actor.branchId ?? null)
-      : (payload.branchId ?? null);
+      ? null : null;
 
   const isExist = await prisma.allRole.findFirst({
-    where: { role: payload.role, branchId },
+    where: { role: payload.role },
   });
   if (isExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Role already exists");
@@ -73,7 +72,7 @@ const getAllRole = async (query: any, actor?: ActorContext) => {
 
   // Tenant scoping — non-platform users see only roles in their branch.
   if (actor && !isPlatformAdmin(actor.role)) {
-    andCondition.push({ branchId: actor.branchId ?? null });
+    
   }
 
   const whereCondition: Prisma.AllRoleWhereInput = {
@@ -106,7 +105,7 @@ const getAllRole = async (query: any, actor?: ActorContext) => {
 const getRoleById = async (id: string, actor?: ActorContext) => {
   const result = await prisma.allRole.findUnique({ where: { id } });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
-  if (actor) assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -114,11 +113,11 @@ const updateRole = async (id: string, payload: any, actor?: ActorContext) => {
   const existing = await prisma.allRole.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
   if (actor) {
-    assertTenantAccess(actor, existing.branchId);
+
     if (
       !isPlatformAdmin(actor.role) &&
       payload.branchId &&
-      payload.branchId !== existing.branchId
+      payload.branchId !== null
     ) {
       throw new ApiError(
         httpStatus.FORBIDDEN,
@@ -137,7 +136,7 @@ const updateRole = async (id: string, payload: any, actor?: ActorContext) => {
 const deleteRole = async (id: string, actor?: ActorContext) => {
   const existing = await prisma.allRole.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
-  if (actor) assertTenantAccess(actor, existing.branchId);
+
 
   await prisma.allRole.delete({ where: { id } });
   return { message: "Role deleted successfully" };
@@ -148,7 +147,7 @@ const updateRoleStatus = async (id: string, actor?: ActorContext) => {
   if (!isExist) {
     throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
   }
-  if (actor) assertTenantAccess(actor, isExist.branchId);
+
 
   const result = await prisma.allRole.update({
     where: { id },

@@ -20,7 +20,7 @@ const createFolder = async (payload: any, actor: ActorContext) => {
     data: {
       ...payload,
       slug,
-      branchId: actor.branchId ?? null,
+      
     },
   });
   return result;
@@ -65,8 +65,7 @@ const getAllFolders = async (query: any, actor: ActorContext) => {
   const where: Prisma.FolderWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...filter,
-    ...tenantFilter(actor),
-  };
+      };
 
   const allFolders = await prisma.folder.findMany({
     where,
@@ -102,7 +101,7 @@ const getFolderById = async (id: string, actor: ActorContext) => {
     include: { images: true },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  assertTenantAccess(actor, result.branchId);
+
 
   const allFolders = await prisma.folder.findMany({
     where: tenantFilter(actor),
@@ -118,7 +117,7 @@ const getFolderById = async (id: string, actor: ActorContext) => {
 const updateFolder = async (id: string, payload: any, actor: ActorContext) => {
   const existing = await prisma.folder.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const updateData: Prisma.FolderUpdateInput = { ...payload };
 
@@ -140,7 +139,7 @@ const updateFolder = async (id: string, payload: any, actor: ActorContext) => {
 const deleteFolder = async (id: string, actor: ActorContext) => {
   const existing = await prisma.folder.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.folder.delete({ where: { id } });
   return result;
@@ -153,3 +152,4 @@ export const FolderServices = {
   updateFolder,
   deleteFolder,
 };
+

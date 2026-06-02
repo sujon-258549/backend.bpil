@@ -1,22 +1,23 @@
+import type { ActorContext } from "../../utils/tenant.ts";
 export declare const DepartmentServices: {
-    createDepartmentIntoDB: (payload: any) => Promise<{
-        name: string;
+    createDepartmentIntoDB: (payload: any, actor: ActorContext) => Promise<{
+        name: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    getAllDepartment: (query: any) => Promise<{
+    getAllDepartment: (query: any, actor: ActorContext) => Promise<{
         data: ({
             users: {
-                email: string;
-                mobile: string;
+                email: string | null;
+                mobile: string | null;
                 id: string;
                 roleId: string | null;
             }[];
         } & {
-            name: string;
+            name: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
@@ -29,39 +30,39 @@ export declare const DepartmentServices: {
             total: number;
         };
     }>;
-    getDepartmentById: (id: string) => Promise<({
+    getDepartmentById: (id: string, actor: ActorContext) => Promise<{
         users: {
-            email: string;
-            mobile: string;
+            email: string | null;
+            mobile: string | null;
             id: string;
             roleId: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        id: string;
-        description: string | null;
-    }) | null>;
-    updateDepartment: (id: string, payload: any) => Promise<{
-        name: string;
+        name: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    deleteDepartment: (id: string) => Promise<{
-        name: string;
+    updateDepartment: (id: string, payload: any, actor: ActorContext) => Promise<{
+        name: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
         description: string | null;
     }>;
-    updateDepartmentStatus: (id: string) => Promise<{
-        name: string;
+    deleteDepartment: (id: string, actor: ActorContext) => Promise<{
+        name: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        id: string;
+        description: string | null;
+    }>;
+    updateDepartmentStatus: (id: string, actor: ActorContext) => Promise<{
+        name: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;

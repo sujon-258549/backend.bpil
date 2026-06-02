@@ -16,9 +16,9 @@ import {
 const resolveBranchId = async (subCategoryId: string) => {
   const sc = await prisma.subCategory.findUnique({
     where: { id: subCategoryId },
-    select: { category: { select: { branchId: true } } },
+    select: { category: { select: { id: true } } },
   });
-  return sc?.category?.branchId ?? null;
+  return null;
 };
 
 const createSubCategory = async (payload: any, actor?: ActorContext) => {
@@ -26,12 +26,12 @@ const createSubCategory = async (payload: any, actor?: ActorContext) => {
   if (actor && payload.categoryId) {
     const parent = await prisma.category.findUnique({
       where: { id: payload.categoryId },
-      select: { branchId: true },
+      select: { id: true },
     });
     if (!parent) {
       throw new ApiError(httpStatus.NOT_FOUND, "Parent category not found");
     }
-    assertTenantAccess(actor, parent.branchId);
+
   }
 
   const slug = payload.slug || slugCreate(payload.name);
@@ -81,7 +81,7 @@ const getAllSubCategory = async (query: any, actor?: ActorContext) => {
   // Tenant scoping — non-platform users only see sub-categories whose
   // parent Category belongs to their branch.
   if (actor && !isPlatformAdmin(actor.role)) {
-    andCondition.push({ category: { branchId: actor.branchId ?? null } });
+    
   }
 
   const whereCondition: Prisma.SubCategoryWhereInput = {
@@ -130,14 +130,13 @@ const getSubCategoryById = async (id: string, actor?: ActorContext) => {
           name: true,
           id: true,
           slug: true,
-          branchId: true,
         },
       },
     },
   });
   if (!result)
     throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
-  if (actor) assertTenantAccess(actor, result.category?.branchId ?? null);
+
   return result;
 };
 
@@ -171,18 +170,18 @@ const updateSubCategory = async (
     throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
   }
   if (actor) {
-    assertTenantAccess(actor, await resolveBranchId(id));
+
     // If moving under a new parent category, make sure that one is
     // also inside the caller's branch.
     if (payload.categoryId) {
       const newParent = await prisma.category.findUnique({
         where: { id: payload.categoryId },
-        select: { branchId: true },
+        select: { id: true },
       });
       if (!newParent) {
         throw new ApiError(httpStatus.NOT_FOUND, "Parent category not found");
       }
-      assertTenantAccess(actor, newParent.branchId);
+
     }
   }
 
@@ -216,7 +215,7 @@ const updateSubCategory = async (
 };
 
 const deleteSubCategory = async (id: string, actor?: ActorContext) => {
-  if (actor) assertTenantAccess(actor, await resolveBranchId(id));
+
   await prisma.subCategory.delete({ where: { id } });
   return { message: "SubCategory deleted successfully" };
 };
@@ -226,7 +225,7 @@ const updateSubCategoryStatus = async (id: string, actor?: ActorContext) => {
   });
   if (!existingSubCategory)
     throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
-  if (actor) assertTenantAccess(actor, await resolveBranchId(id));
+
 
   const result = await prisma.subCategory.update({
     where: { id },

@@ -18,7 +18,7 @@ const createBlog = async (payload: any, actor: ActorContext) => {
   const data: any = {
     ...payload,
     slug,
-    branchId: actor.branchId ?? null,
+    
   };
   if (payload.createdAt) data.createdAt = new Date(payload.createdAt);
   if (payload.updatedAt) data.updatedAt = new Date(payload.updatedAt);
@@ -48,8 +48,7 @@ const getAllBlog = async (query: any, actor: ActorContext) => {
   const where: Prisma.BlogWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...queryFilter,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.blog.findMany({
     where,
@@ -71,14 +70,14 @@ const getBlogById = async (id: string, actor: ActorContext) => {
     where: { OR: [{ id }, { slug: id }] },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
 const updateBlog = async (id: string, payload: any, actor: ActorContext) => {
   const existing = await prisma.blog.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const updateData: Partial<Prisma.BlogUpdateInput> = { ...payload };
 
@@ -105,7 +104,7 @@ const updateBlog = async (id: string, payload: any, actor: ActorContext) => {
 const updateBlogStatus = async (id: string, actor: ActorContext) => {
   const existing = await prisma.blog.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.blog.update({
     where: { id },
@@ -117,7 +116,7 @@ const updateBlogStatus = async (id: string, actor: ActorContext) => {
 const deleteBlog = async (id: string, actor: ActorContext) => {
   const existing = await prisma.blog.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   await prisma.blog.delete({ where: { id } });
   return { message: "Blog deleted successfully" };
@@ -131,3 +130,4 @@ export const BlogServices = {
   deleteBlog,
   updateBlogStatus,
 };
+

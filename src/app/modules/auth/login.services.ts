@@ -20,8 +20,7 @@ const loginUser = async (payload: any) => {
       workInfo: {
         include: {
           subCategories: true,
-          workTypes: true,
-        },
+                  },
       },
       department: true,
       address: true,
@@ -143,7 +142,7 @@ const loginUser = async (payload: any) => {
       workInfo: {
         ...user.workInfo,
         subCategories: user.workInfo?.subCategories?.map((s) => s.name),
-        workTypes: user.workInfo?.workTypes?.map((w) => w.name),
+        
       },
       isActive: user.isActive,
       isVerified: user.isVerified,
@@ -173,8 +172,7 @@ const refreshToken = async (token: string) => {
       workInfo: {
         include: {
           subCategories: true,
-          workTypes: true,
-        },
+                  },
       },
       department: true,
       address: true,
@@ -237,7 +235,7 @@ const refreshToken = async (token: string) => {
       workInfo: {
         ...user.workInfo,
         subCategories: user.workInfo?.subCategories?.map((s) => s.name),
-        workTypes: user.workInfo?.workTypes?.map((w) => w.name),
+        
       },
       isActive: user.isActive,
       isVerified: user.isVerified,
@@ -334,8 +332,7 @@ const resetPassword = async (email: string, password: string, otp: string) => {
       workInfo: {
         include: {
           subCategories: true,
-          workTypes: true,
-        },
+                  },
       },
       department: true,
       address: true,
@@ -386,7 +383,7 @@ const resetPassword = async (email: string, password: string, otp: string) => {
       workInfo: {
         ...updatedUser.workInfo,
         subCategories: updatedUser.workInfo?.subCategories?.map((s) => s.name),
-        workTypes: updatedUser.workInfo?.workTypes?.map((w) => w.name),
+        
       },
       isActive: updatedUser.isActive,
       isVerified: updatedUser.isVerified,

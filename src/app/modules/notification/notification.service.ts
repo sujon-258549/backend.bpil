@@ -12,7 +12,7 @@ const createNotification = async (payload: any, actor: ActorContext) => {
   const result = await prisma.notification.create({
     data: {
       ...payload,
-      branchId: actor.branchId ?? null,
+      
     },
   });
 
@@ -51,8 +51,7 @@ const getAllNotifications = async (query: any, actor: ActorContext) => {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...queryFilter,
     isDeleted: false,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.notification.findMany({
     where,
@@ -73,7 +72,7 @@ const getNotificationById = async (id: string, actor: ActorContext) => {
   const result = await prisma.notification.findUnique({ where: { id } });
   if (!result)
     throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -85,7 +84,7 @@ const updateNotification = async (
   const isExist = await prisma.notification.findUnique({ where: { id } });
   if (!isExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
-  assertTenantAccess(actor, isExist.branchId);
+
 
   const result = await prisma.notification.update({
     where: { id },
@@ -108,7 +107,7 @@ const deleteNotification = async (id: string, actor: ActorContext) => {
   const isExist = await prisma.notification.findUnique({ where: { id } });
   if (!isExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
-  assertTenantAccess(actor, isExist.branchId);
+
 
   await prisma.notification.update({
     where: { id },
@@ -142,3 +141,4 @@ export const NotificationServices = {
   deleteNotification,
   markAsRead,
 };
+

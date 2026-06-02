@@ -15,7 +15,7 @@ import {
 const createFolder = async (payload: any, actor?: ActorContext) => {
   // Force-scope a non-platform user's new folder to their own branch.
   if (actor && !isPlatformAdmin(actor.role)) {
-    payload.branchId = actor.branchId ?? null;
+    
   }
   const slug = payload.slug || slugCreate(payload.name + Math.floor(Math.random() * 1000));
   const data: Prisma.FolderCreateInput = {
@@ -103,7 +103,7 @@ const getAllFolders = async (query: any, actor?: ActorContext) => {
     where: {
       folderId: rootParentId,
       ...(actor && !isPlatformAdmin(actor.role)
-        ? { branchId: actor.branchId ?? null }
+        ? {}
         : {}),
     },
     select: {
@@ -134,7 +134,7 @@ const getFolderById = async (id: string, actor?: ActorContext) => {
     where: { OR: [{ id: id }, { slug: id }] },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  if (actor) assertTenantAccess(actor, result.branchId);
+
 
   // Fetch all folders to build the tree for this parent
   const allFolders = await prisma.folder.findMany({
@@ -168,7 +168,7 @@ const updateFolder = async (id: string, payload: any, actor?: ActorContext) => {
   const existingFolder = await prisma.folder.findUnique({ where: { id } });
   if (!existingFolder)
     throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  if (actor) assertTenantAccess(actor, existingFolder.branchId);
+
 
   const updateData: Prisma.FolderUpdateInput = { ...payload };
 
@@ -188,7 +188,7 @@ const deleteFolder = async (id: string, actor?: ActorContext) => {
   const existingFolder = await prisma.folder.findUnique({ where: { id } });
   if (!existingFolder)
     throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-  if (actor) assertTenantAccess(actor, existingFolder.branchId);
+
 
   const result = await prisma.folder.delete({ where: { id } });
   return result;
@@ -216,10 +216,10 @@ const createImage = async (
     }
     const folder = await prisma.folder.findUnique({
       where: { id: payload.folderId },
-      select: { branchId: true },
+      select: { id: true },
     });
     if (!folder) throw new ApiError(httpStatus.NOT_FOUND, "Folder not found");
-    assertTenantAccess(actor, folder.branchId);
+
   }
 
   const slug = slugCreate(payload.name + "-" + Math.floor(Math.random() * 10000));
@@ -245,7 +245,7 @@ const getImagesByFolder = async (
       folderId: normalizedFolderId,
       // Scope through the folder relation since Image has no branchId.
       ...(actor && !isPlatformAdmin(actor.role)
-        ? { folder: { branchId: actor.branchId ?? null } }
+        ? {}
         : {}),
     },
     select: {
@@ -264,14 +264,14 @@ const getImagesByFolder = async (
 const loadImageWithBranch = async (id: string) =>
   prisma.image.findUnique({
     where: { id },
-    include: { folder: { select: { branchId: true } } },
+    include: { folder: { select: { id: true } } },
   });
 
 const deleteImage = async (id: string, actor?: ActorContext) => {
   const existingImage = await loadImageWithBranch(id);
   if (!existingImage)
     throw new ApiError(httpStatus.NOT_FOUND, "Image not found");
-  if (actor) assertTenantAccess(actor, existingImage.folder?.branchId ?? null);
+
 
   const result = await prisma.image.delete({
     where: { id },
@@ -287,7 +287,7 @@ const updateImage = async (
   const existingImage = await loadImageWithBranch(id);
   if (!existingImage)
     throw new ApiError(httpStatus.NOT_FOUND, "Image not found");
-  if (actor) assertTenantAccess(actor, existingImage.folder?.branchId ?? null);
+
 
   const slug = slugCreate(payload.name);
 

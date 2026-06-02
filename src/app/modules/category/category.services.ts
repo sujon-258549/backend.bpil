@@ -21,7 +21,7 @@ const createCategoryIntoDB = async (payload: any, actor: ActorContext) => {
     icon: payload.icon,
     slug,
     description: payload.description,
-    branchId: actor.branchId ?? null,
+    
   };
 
   if (payload.createdAt) data.createdAt = new Date(payload.createdAt);
@@ -54,8 +54,7 @@ const getAllCategory = async (query: any, actor: ActorContext) => {
   const where: Prisma.CategoryWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...filter,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.category.findMany({
     where,
@@ -87,7 +86,7 @@ const getCategoryById = async (id: string, actor: ActorContext) => {
     },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -98,7 +97,7 @@ const updateCategory = async (
 ) => {
   const existing = await prisma.category.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const updateData: Partial<Prisma.CategoryUpdateInput> = {};
 
@@ -134,7 +133,7 @@ const updateCategory = async (
 const updateCategoryStatus = async (id: string, actor: ActorContext) => {
   const existing = await prisma.category.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.category.update({
     where: { id },
@@ -146,7 +145,7 @@ const updateCategoryStatus = async (id: string, actor: ActorContext) => {
 const deleteCategory = async (id: string, actor: ActorContext) => {
   const existing = await prisma.category.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.category.delete({ where: { id } });
   return result;
@@ -160,3 +159,4 @@ export const CategoryServices = {
   deleteCategory,
   updateCategoryStatus,
 };
+

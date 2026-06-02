@@ -105,7 +105,7 @@ const createUserIntoDB = async (payload: any) => {
 
     // Create WorkInfo
     if (workInfo) {
-      const { subCategoryIds, workTypeIds, ...workInfoRest } = workInfo;
+      const { subCategoryIds, ...workInfoRest } = workInfo;
       await tc.workInfo.create({
         data: {
           ...workInfoRest,
@@ -116,12 +116,7 @@ const createUserIntoDB = async (payload: any) => {
                   connect: subCategoryIds.map((id: string) => ({ id })),
                 }
               : undefined,
-          workTypes:
-            workTypeIds && workTypeIds.length > 0
-              ? {
-                  connect: workTypeIds.map((id: string) => ({ id })),
-                }
-              : undefined,
+          
         },
       });
     }
@@ -172,12 +167,7 @@ const createUserIntoDB = async (payload: any) => {
                 name: true,
               },
             },
-            workTypes: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+            
           },
         },
       },
@@ -267,20 +257,7 @@ const getAllUsers = async (query: any, actor?: ActorContext) => {
           name: true,
         },
       },
-      // Branch + its active subscription + plan — used by the Branch
-      // Super Admin list so each row can show the plan they're on.
-      branch: {
-        select: {
-          id: true,
-          name: true,
-          subscriptions: {
-            where: { isActive: true, isDeleted: false },
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            include: { plan: true },
-          },
-        },
-      },
+      
       profile: {
         include: {
           profilePhoto: {
@@ -306,12 +283,7 @@ const getAllUsers = async (query: any, actor?: ActorContext) => {
               name: true,
             },
           },
-          workTypes: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          
         },
       },
     },
@@ -350,20 +322,7 @@ const getUserById = async (id: string, actor?: ActorContext) => {
           name: true,
         },
       },
-      // Branch + its active subscription + plan — used by the Branch
-      // Super Admin list so each row can show the plan they're on.
-      branch: {
-        select: {
-          id: true,
-          name: true,
-          subscriptions: {
-            where: { isActive: true, isDeleted: false },
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            include: { plan: true },
-          },
-        },
-      },
+      
       profile: {
         include: {
           profilePhoto: {
@@ -389,18 +348,13 @@ const getUserById = async (id: string, actor?: ActorContext) => {
               name: true,
             },
           },
-          workTypes: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          
         },
       },
     },
   });
   if (!user) return user;
-  if (actor) assertTenantAccess(actor, user.branchId);
+
   const { password, ...rest } = user;
   return {
     ...rest,
@@ -427,16 +381,16 @@ const updateUser = async (
   if (actor && !isPlatformAdmin(actor.role)) {
     const target = await prisma.user.findUnique({
       where: { id },
-      select: { branchId: true },
+      select: { id: true },
     });
     if (!target) {
       throw new ApiError(status.NOT_FOUND, "User not found");
     }
-    assertTenantAccess(actor, target.branchId);
+
     const incomingBranchId = rest?.branchId ?? payload?.branchId;
     if (
       incomingBranchId !== undefined &&
-      incomingBranchId !== target.branchId
+      incomingBranchId !== null
     ) {
       throw new ApiError(
         status.FORBIDDEN,
@@ -503,7 +457,7 @@ const updateUser = async (
   // Prepare workInfo update
   let workInfoUpdate = undefined;
   if (workInfo) {
-    const { subCategoryIds, workTypeIds, ...workInfoRest } = workInfo;
+    const { subCategoryIds, ...workInfoRest } = workInfo;
     workInfoUpdate = {
       update: {
         ...workInfoRest,
@@ -513,11 +467,7 @@ const updateUser = async (
                 set: subCategoryIds.map((id: string) => ({ id })),
               }
             : undefined,
-        workTypes: workTypeIds
-          ? {
-              set: workTypeIds.map((id: string) => ({ id })),
-            }
-          : undefined,
+        
       },
     };
   }
@@ -577,20 +527,7 @@ const updateUser = async (
           name: true,
         },
       },
-      // Branch + its active subscription + plan — used by the Branch
-      // Super Admin list so each row can show the plan they're on.
-      branch: {
-        select: {
-          id: true,
-          name: true,
-          subscriptions: {
-            where: { isActive: true, isDeleted: false },
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            include: { plan: true },
-          },
-        },
-      },
+      
       profile: {
         include: {
           profilePhoto: {
@@ -616,12 +553,7 @@ const updateUser = async (
               name: true,
             },
           },
-          workTypes: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          
         },
       },
     },
@@ -650,20 +582,7 @@ const getMyData = async (id: string) => {
           name: true,
         },
       },
-      // Branch + its active subscription + plan — used by the Branch
-      // Super Admin list so each row can show the plan they're on.
-      branch: {
-        select: {
-          id: true,
-          name: true,
-          subscriptions: {
-            where: { isActive: true, isDeleted: false },
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            include: { plan: true },
-          },
-        },
-      },
+      
       profile: {
         include: {
           profilePhoto: {
@@ -689,12 +608,7 @@ const getMyData = async (id: string) => {
               name: true,
             },
           },
-          workTypes: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          
         },
       },
     },
@@ -741,8 +655,7 @@ const changePassword = async (
       workInfo: {
         include: {
           subCategories: true,
-          workTypes: true,
-        },
+                  },
       },
       department: true,
       address: true,
@@ -792,8 +705,7 @@ const changePassword = async (
       workInfo: {
         include: {
           subCategories: true,
-          workTypes: true,
-        },
+                  },
       },
       department: true,
       address: true,
@@ -844,7 +756,7 @@ const changePassword = async (
       workInfo: {
         ...updatedUser.workInfo,
         subCategories: updatedUser.workInfo?.subCategories?.map((s) => s.name),
-        workTypes: updatedUser.workInfo?.workTypes?.map((w) => w.name),
+        
       },
       isActive: updatedUser.isActive,
       isVerified: updatedUser.isVerified,
@@ -888,7 +800,7 @@ const deleteUser = async (
   if (!user) {
     throw new ApiError(status.NOT_FOUND, "🔍❓ User not Found");
   }
-  if (actor) assertTenantAccess(actor, user.branchId);
+
 
   // Delete related records using mobile (since they relate via mobile field)
   await prisma.otp.deleteMany({
@@ -923,7 +835,7 @@ const softDeleteUser = async (
   if (!user) {
     throw new ApiError(status.NOT_FOUND, "🔍❓ User not Found");
   }
-  if (actor) assertTenantAccess(actor, user.branchId);
+
 
   const deletedUser = await prisma.user.update({
     where: { id },
@@ -944,7 +856,7 @@ const blockUser = async (
   if (!user) {
     throw new ApiError(status.NOT_FOUND, "🔍❓ User not Found");
   }
-  if (actor) assertTenantAccess(actor, user.branchId);
+
 
   const deletedUser = await prisma.user.update({
     where: { id },

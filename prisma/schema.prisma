@@ -18,11 +18,9 @@ model AllRole {
   isActive        Boolean          @default(true)
   // Null = global role created by Platform Super Admin (e.g. SUPER_ADMIN).
   // Non-null = role created by a Branch Super Admin for their own tenant;
-  // other tenants cannot see or use it.
-  branchId        String?
+  // other tenants cannot see or use it.
   createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  branch          MainBranch?      @relation(fields: [branchId], references: [id])
+  updatedAt       DateTime         @updatedAt
   users           User[]
   rolePermissions RolePermission[]
 
@@ -42,14 +40,12 @@ model RolePermission {
 }
 
 model Department {
-  id          String   @id @default(uuid())
-  branchId    String?
+  id          String   @id @default(uuid())
   name        String?
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  branch      MainBranch?  @relation(fields: [branchId], references: [id])
+  updatedAt   DateTime @updatedAt
   users       User[]
 
   @@map("departments")
@@ -62,70 +58,9 @@ model Department {
 // MainBranch = a company (= one customer tenant). Kept `@@map("branches")`
 // so the existing `branches` table and all its data are reused — only the
 // Prisma model name changed, not the database table.
-model MainBranch {
-  id             String         @id @default(uuid())
-  ownerId        String?
-  name           String?
-  slug           String?        @unique
-  description    String?
-  logo           String?
-  email          String?
-  phone          String?
-  website        String?
-  address        String?
-  division       String?
-  district       String?
-  upazila        String?
-  industry       String?
-  businessType   String?
-  registrationNo String?
-  taxId          String?
-  currency       String?        @default("BDT")
-  timezone       String?        @default("Asia/Dhaka")
-  isActive       Boolean        @default(true)
-  isDeleted      Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  owner          User?          @relation("OwnedMainBranches", fields: [ownerId], references: [id])
-  subBranches    SubBranch[]
-  employees      User[]         @relation("MainBranchEmployees")
-  departments    Department[]
-  categories     Category[]
-  workTypes      WorkType[]
-  blogs          Blog[]
-  folders        Folder[]
-  comments       Comment[]
-  notifications  Notification[]
-  subscriptions  Subscription[]
-  allRoles       AllRole[]
-  designations   Designation[]
 
-  @@map("branches")
-}
 
-model SubBranch {
-  id          String   @id @default(uuid())
-  branchId    String?
-  managerId   String?
-  name        String?
-  slug        String?  @unique
-  description String?
-  email       String?
-  phone       String?
-  address     String?
-  division    String?
-  district    String?
-  upazila     String?
-  isActive    Boolean  @default(true)
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  branch      MainBranch?  @relation(fields: [branchId], references: [id])
-  manager     User?    @relation("ManagedSubBranches", fields: [managerId], references: [id])
-  employees   User[]   @relation("SubBranchEmployees")
 
-  @@map("sub_branches")
-}
 
 model Designation {
   id          String   @id @default(uuid())
@@ -133,13 +68,10 @@ model Designation {
   slug        String?  @unique
   description String?
   // Null = global designation created by Platform Super Admin. Non-null
-  // = designation created by a Branch Super Admin for their own tenant.
-  branchId    String?
+  // = designation created by a Branch Super Admin for their own tenant.
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
-
-  branch      MainBranch? @relation(fields: [branchId], references: [id])
+  isActive    Boolean  @default(true)
   users       User[]
 }
 
@@ -183,9 +115,7 @@ model User {
   loginTryTime  DateTime? @default(now())
 
   // ---- FKs ----
-  departmentId   String?
-  branchId       String?
-  subBranchId    String?
+  departmentId   String?
 
   // ---- Timestamps ----
   createdAt DateTime @default(now())
@@ -195,15 +125,9 @@ model User {
   address            Address?
   profile            Profile?
   workInfo           WorkInfo?
-  department         Department?        @relation(fields: [departmentId], references: [id])
-  branch             MainBranch?            @relation("MainBranchEmployees", fields: [branchId], references: [id])
-  subBranch          SubBranch?         @relation("SubBranchEmployees", fields: [subBranchId], references: [id])
-  ownedBranches      MainBranch[]           @relation("OwnedMainBranches")
-  managedSubBranches SubBranch[]        @relation("ManagedSubBranches")
-  subscriptionEarns  SubscriptionEarn[]
+  department         Department?        @relation(fields: [departmentId], references: [id])
   comments           Comment[]
-  notifications      Notification[]
-  payments           Payment[]
+  notifications      Notification[]
   loginHistories     LoginHistory[]
   designation   Designation? @relation(fields: [designationId], references: [id])
 
@@ -291,9 +215,7 @@ model WorkInfo {
   id                 String        @id @default(uuid())
   mobile             String?       @unique
   subCategories      SubCategory[]
-  experience         String?
-  workType           String?
-  workTypes          WorkType[]
+  experience         String?
   workStartTime      String?
   workTimeLimit      String?
   availableTime      String?
@@ -311,91 +233,19 @@ model WorkInfo {
 // SUBSCRIPTION / PAYMENT
 // ============================================================================
 
-model SubscriptionEarn {
-  id             String        @id @default(uuid())
-  userId         String?
-  subscriptionId String?
-  amount         String?
-  expireAt       DateTime?
-  isActive       Boolean       @default(true)
-  isExpired      Boolean       @default(false)
-  renewAt        DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  user           User?         @relation(fields: [userId], references: [id])
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
 
-  @@map("subscription_earns")
-}
 
-model Payment {
-  id                 String         @id @default(cuid())
-  transactionId      String?        @unique
-  amount             Float?
-  status             PaymentStatus? @default(PENDING)
-  paymentMethod      String?
-  userId             String?
-  subscriptionId     String?
-  user               User?          @relation(fields: [userId], references: [id])
-  subscription       Subscription?  @relation(fields: [subscriptionId], references: [id])
-  paymentGatewayData Json?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
 
-  @@map("payments")
-}
 
 // SubscriptionPlan = reusable template the Platform Super Admin defines
 // once (e.g. "Pro Monthly", "Lifetime Enterprise"). Companies pick from
 // these when buying a subscription.
-model SubscriptionPlan {
-  id            String   @id @default(uuid())
-  name          String?
-  slug          String?  @unique
-  description   String?
-  price         String?
-  currency      String?  @default("BDT")
-  // Stable cycle identifier from lib/billing-cycles ("3-day", "2-week",
-  // "6-month", "1-year", "lifetime", ...).
-  billingCycle  String?
-  // Number of months covered. Null => lifetime.
-  durationMonths Int?
-  // Marketing list of features included in the plan.
-  features      String[] @default([])
-  isRecomended  Boolean  @default(false)
-  isActive      Boolean  @default(true)
-  isDeleted     Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
-  subscriptions Subscription[]
-
-  @@map("subscription_plans")
-}
 
 // Subscription = a specific company's (Branch's) active billing window
 // against a Plan. Pure instance — all plan details (name, price, cycle,
 // currency) come from the related SubscriptionPlan, never duplicated here.
-model Subscription {
-  id        String    @id @default(uuid())
-  branchId  String?
-  planId    String?
-  startDate DateTime?
-  // Null when the linked plan is lifetime.
-  endDate   DateTime?
-  notes     String?
-  isActive  Boolean   @default(true)
-  isDeleted Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
 
-  branch            MainBranch?        @relation(fields: [branchId], references: [id])
-  plan              SubscriptionPlan?  @relation(fields: [planId], references: [id])
-  payments          Payment[]
-  subscriptionEarns SubscriptionEarn[]
-
-  @@map("subscriptions")
-}
 
 // ============================================================================
 // MISC
@@ -412,16 +262,14 @@ model Otp {
 }
 
 model Category {
-  id            String        @id @default(uuid())
-  branchId      String?
+  id            String        @id @default(uuid())
   icon          String?
   description   String?
   name          String?
   slug          String?       @unique
   status        Boolean       @default(true)
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  branch        MainBranch?       @relation(fields: [branchId], references: [id])
+  updatedAt     DateTime      @updatedAt
   subCategories SubCategory[]
 
   @@map("categories")
@@ -443,23 +291,10 @@ model SubCategory {
   @@map("sub_categories")
 }
 
-model WorkType {
-  id          String     @id @default(uuid())
-  branchId    String?
-  name        String?
-  description String?
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  branch      MainBranch?    @relation(fields: [branchId], references: [id])
-  workInfos   WorkInfo[]
 
-  @@map("work_types")
-}
 
 model Blog {
-  id          String    @id @default(uuid())
-  branchId    String?
+  id          String    @id @default(uuid())
   title       String?
   slug        String?   @unique
   content     String?
@@ -474,22 +309,19 @@ model Blog {
   isPublished Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  branch      MainBranch?   @relation(fields: [branchId], references: [id])
+  updatedAt   DateTime  @updatedAt
 
   @@map("blogs")
 }
 
 model Folder {
-  id        String   @id @default(uuid())
-  branchId  String?
+  id        String   @id @default(uuid())
   name      String?
   slug      String?  @unique
   parentId  String?
   status    Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  branch    MainBranch?  @relation(fields: [branchId], references: [id])
+  updatedAt DateTime @updatedAt
   parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
   children  Folder[] @relation("FolderToFolder")
   images    Image[]
@@ -514,12 +346,10 @@ model Image {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
-  branchId  String?
+  id        String   @id @default(uuid())
   userId    String?
   comment   String?
-  isDeleted Boolean  @default(false)
-  branch    MainBranch?  @relation(fields: [branchId], references: [id])
+  isDeleted Boolean  @default(false)
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -528,14 +358,12 @@ model Comment {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  branchId  String?
+  id        String   @id @default(uuid())
   userId    String?
   type      String?
   message   String?
   isRead    Boolean  @default(false)
-  isDeleted Boolean  @default(false)
-  branch    MainBranch?  @relation(fields: [branchId], references: [id])
+  isDeleted Boolean  @default(false)
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -2,7 +2,6 @@ import { z } from "zod";
 export declare const CommentValidation: {
     createCommentZodSchema: z.ZodObject<{
         body: z.ZodObject<{
-            applicationId: z.ZodString;
             comment: z.ZodString;
         }, z.core.$strip>;
     }, z.core.$strip>;

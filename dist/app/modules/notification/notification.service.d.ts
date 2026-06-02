@@ -1,28 +1,25 @@
+import type { ActorContext } from "../../utils/tenant.ts";
 export declare const NotificationServices: {
-    createNotification: (payload: any) => Promise<{
+    createNotification: (payload: any, actor: ActorContext) => Promise<{
         isDeleted: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string;
-        userId: string;
-        message: string;
-        jobId: string | null;
+        type: string | null;
+        message: string | null;
+        userId: string | null;
         isRead: boolean;
-        applicationId: string | null;
     }>;
-    getAllNotifications: (query: any) => Promise<{
+    getAllNotifications: (query: any, actor: ActorContext) => Promise<{
         data: {
             isDeleted: boolean;
             createdAt: Date;
             updatedAt: Date;
             id: string;
-            type: string;
-            userId: string;
-            message: string;
-            jobId: string | null;
+            type: string | null;
+            message: string | null;
+            userId: string | null;
             isRead: boolean;
-            applicationId: string | null;
         }[];
         meta: {
             page: number;
@@ -30,31 +27,27 @@ export declare const NotificationServices: {
             total: number;
         };
     }>;
-    getNotificationById: (id: string) => Promise<{
+    getNotificationById: (id: string, actor: ActorContext) => Promise<{
         isDeleted: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string;
-        userId: string;
-        message: string;
-        jobId: string | null;
+        type: string | null;
+        message: string | null;
+        userId: string | null;
         isRead: boolean;
-        applicationId: string | null;
     }>;
-    updateNotification: (id: string, payload: any) => Promise<{
+    updateNotification: (id: string, payload: any, actor: ActorContext) => Promise<{
         isDeleted: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string;
-        userId: string;
-        message: string;
-        jobId: string | null;
+        type: string | null;
+        message: string | null;
+        userId: string | null;
         isRead: boolean;
-        applicationId: string | null;
     }>;
-    deleteNotification: (id: string) => Promise<{
+    deleteNotification: (id: string, actor: ActorContext) => Promise<{
         message: string;
     }>;
     markAsRead: (userId: string) => Promise<{

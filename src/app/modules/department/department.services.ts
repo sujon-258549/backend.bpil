@@ -13,7 +13,7 @@ const createDepartmentIntoDB = async (payload: any, actor: ActorContext) => {
       name: payload.name,
       description: payload.description,
       isActive: payload.isActive,
-      branchId: actor.branchId ?? null,
+      
     },
   });
   return result;
@@ -41,8 +41,7 @@ const getAllDepartment = async (query: any, actor: ActorContext) => {
   const where: Prisma.DepartmentWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...filter,
-    ...tenantFilter(actor),
-  };
+      };
 
   const result = await prisma.department.findMany({
     where,
@@ -76,7 +75,7 @@ const getDepartmentById = async (id: string, actor: ActorContext) => {
     },
   });
   if (!result) throw new ApiError(httpStatus.NOT_FOUND, "Department not found");
-  assertTenantAccess(actor, result.branchId);
+
   return result;
 };
 
@@ -87,7 +86,7 @@ const updateDepartment = async (
 ) => {
   const existing = await prisma.department.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Department not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.department.update({
     where: { id },
@@ -103,7 +102,7 @@ const updateDepartment = async (
 const deleteDepartment = async (id: string, actor: ActorContext) => {
   const existing = await prisma.department.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Department not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.department.delete({ where: { id } });
   return result;
@@ -112,7 +111,7 @@ const deleteDepartment = async (id: string, actor: ActorContext) => {
 const updateDepartmentStatus = async (id: string, actor: ActorContext) => {
   const existing = await prisma.department.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Department not found");
-  assertTenantAccess(actor, existing.branchId);
+
 
   const result = await prisma.department.update({
     where: { id },
@@ -129,3 +128,4 @@ export const DepartmentServices = {
   deleteDepartment,
   updateDepartmentStatus,
 };
+
