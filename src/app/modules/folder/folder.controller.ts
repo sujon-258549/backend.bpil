@@ -68,10 +68,69 @@ const deleteFolder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const uploadFile = catchAsync(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw new Error("No file uploaded");
+  }
+  
+  const result = await FolderServices.uploadFile(
+    req.file,
+    req.body.folderId as string | undefined,
+    actorFromReq(req)
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.CREATED,
+    message: "File uploaded successfully",
+    data: result,
+  });
+});
+
+const getImageProxy = catchAsync(async (req: Request, res: Response) => {
+  const result = await FolderServices.getImageProxy(req.params.id as string);
+  if (result.url) {
+    res.redirect(result.url);
+  } else {
+    res.status(404).send("Image not found");
+  }
+});
+
+const updateImage = catchAsync(async (req: Request, res: Response) => {
+  const result = await FolderServices.updateImage(
+    req.params.id as string,
+    req.body,
+    actorFromReq(req),
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Image renamed successfully",
+    data: result,
+  });
+});
+
+const deleteImage = catchAsync(async (req: Request, res: Response) => {
+  const result = await FolderServices.deleteImage(
+    req.params.id as string,
+    actorFromReq(req),
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Image deleted successfully",
+    data: result,
+  });
+});
+
 export const FolderController = {
   createFolder,
   getAllFolders,
   getFolderById,
   updateFolder,
   deleteFolder,
+  uploadFile,
+  getImageProxy,
+  updateImage,
+  deleteImage,
 };

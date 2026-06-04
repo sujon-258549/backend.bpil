@@ -8,6 +8,7 @@ export declare const MediaServices: {
         slug: string | null;
         status: boolean;
         parentId: string | null;
+        zoomFolderId: number | null;
     }>;
     getAllFolders: (query: any, actor?: ActorContext) => Promise<{
         meta: {
@@ -38,6 +39,7 @@ export declare const MediaServices: {
         slug: string | null;
         status: boolean;
         parentId: string | null;
+        zoomFolderId: number | null;
     }>;
     deleteFolder: (id: string, actor?: ActorContext) => Promise<{
         name: string | null;
@@ -47,6 +49,7 @@ export declare const MediaServices: {
         slug: string | null;
         status: boolean;
         parentId: string | null;
+        zoomFolderId: number | null;
     }>;
     updateFolder: (id: string, payload: any, actor?: ActorContext) => Promise<{
         name: string | null;
@@ -56,6 +59,7 @@ export declare const MediaServices: {
         slug: string | null;
         status: boolean;
         parentId: string | null;
+        zoomFolderId: number | null;
     }>;
     createImage: (payload: {
         name: string;
@@ -70,6 +74,7 @@ export declare const MediaServices: {
         slug: string | null;
         folderId: string | null;
         status: boolean;
+        zoomFileId: number | null;
     }>;
     getImagesByFolder: (folderId?: string | null, actor?: ActorContext) => Promise<{
         name: string | null;
@@ -85,6 +90,7 @@ export declare const MediaServices: {
         slug: string | null;
         folderId: string | null;
         status: boolean;
+        zoomFileId: number | null;
     }>;
     updateImage: (id: string, payload: {
         name: string;
@@ -97,6 +103,7 @@ export declare const MediaServices: {
         slug: string | null;
         folderId: string | null;
         status: boolean;
+        zoomFileId: number | null;
     }>;
 };
 //# sourceMappingURL=media.service.d.ts.map

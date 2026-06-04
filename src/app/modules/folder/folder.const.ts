@@ -5,4 +5,8 @@ export const folderFilterableFields = [
   "slug",
   "status",
   "parentId",
+  "sortBy",
+  "sortOrder",
+  "limit",
+  "page",
 ];

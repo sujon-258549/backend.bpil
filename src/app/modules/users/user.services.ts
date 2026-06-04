@@ -60,6 +60,22 @@ function normalizeCategoriesInput(raw: unknown): string[] {
 const createUserIntoDB = async (payload: any) => {
   const { user, profile, address, workInfo } = payload;
 
+  if (!user.roleId) {
+    throw new ApiError(status.BAD_REQUEST, "Role is required to create an employee.");
+  }
+
+  const rolePermissions = await prisma.rolePermission.findMany({
+    where: { roleId: user.roleId },
+  });
+
+  const hasPermissions = rolePermissions.some((rp) => rp.permissions && rp.permissions.length > 0);
+  if (!hasPermissions) {
+    throw new ApiError(
+      status.BAD_REQUEST,
+      "The selected role has no assigned permissions. Please assign permissions to this role first."
+    );
+  }
+
   const hashedPassword = await argon2.hash(user.password);
 
   const result = await prisma.$transaction(async (tc) => {

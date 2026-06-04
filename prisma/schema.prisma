@@ -18,9 +18,11 @@ model AllRole {
   isActive        Boolean          @default(true)
   // Null = global role created by Platform Super Admin (e.g. SUPER_ADMIN).
   // Non-null = role created by a Branch Super Admin for their own tenant;
-  // other tenants cannot see or use it.
+  // other tenants cannot see or use it.
+
   createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  updatedAt       DateTime         @updatedAt
+
   users           User[]
   rolePermissions RolePermission[]
 
@@ -40,12 +42,14 @@ model RolePermission {
 }
 
 model Department {
-  id          String   @id @default(uuid())
+  id          String   @id @default(uuid())
+
   name        String?
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
+
   users       User[]
 
   @@map("departments")
@@ -68,10 +72,12 @@ model Designation {
   slug        String?  @unique
   description String?
   // Null = global designation created by Platform Super Admin. Non-null
-  // = designation created by a Branch Super Admin for their own tenant.
+  // = designation created by a Branch Super Admin for their own tenant.
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
+  isActive    Boolean  @default(true)
+
   users       User[]
 }
 
@@ -115,7 +121,8 @@ model User {
   loginTryTime  DateTime? @default(now())
 
   // ---- FKs ----
-  departmentId   String?
+  departmentId   String?
+
 
   // ---- Timestamps ----
   createdAt DateTime @default(now())
@@ -125,9 +132,11 @@ model User {
   address            Address?
   profile            Profile?
   workInfo           WorkInfo?
-  department         Department?        @relation(fields: [departmentId], references: [id])
+  department         Department?        @relation(fields: [departmentId], references: [id])
+
   comments           Comment[]
-  notifications      Notification[]
+  notifications      Notification[]
+
   loginHistories     LoginHistory[]
   designation   Designation? @relation(fields: [designationId], references: [id])
 
@@ -215,7 +224,9 @@ model WorkInfo {
   id                 String        @id @default(uuid())
   mobile             String?       @unique
   subCategories      SubCategory[]
-  experience         String?
+  experience         String?
+
+
   workStartTime      String?
   workTimeLimit      String?
   availableTime      String?
@@ -262,14 +273,16 @@ model Otp {
 }
 
 model Category {
-  id            String        @id @default(uuid())
+  id            String        @id @default(uuid())
+
   icon          String?
   description   String?
   name          String?
   slug          String?       @unique
   status        Boolean       @default(true)
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  updatedAt     DateTime      @updatedAt
+
   subCategories SubCategory[]
 
   @@map("categories")
@@ -294,34 +307,42 @@ model SubCategory {
 
 
 model Blog {
-  id          String    @id @default(uuid())
+  id          String    @id @default(uuid())
+
   title       String?
   slug        String?   @unique
   content     String?
   description String?
-  excerpt     String?
-  coverImage  String?
-  tags        String[]  @default([])
-  category    String?
+  excerpt       String?
+  coverImageId  String?
+  coverImage    Image?    @relation("BlogCoverImage", fields: [coverImageId], references: [id])
+  thumbnailId   String?
+  thumbnail     Image?    @relation("BlogThumbnail", fields: [thumbnailId], references: [id])
+  tags          String[]  @default([])
+  category    String[]  @default([])
   authorId    String?
   authorName  String?
   authorImage String?
   isPublished Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @updatedAt
+
 
   @@map("blogs")
 }
 
 model Folder {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid())
+
   name      String?
   slug      String?  @unique
   parentId  String?
-  status    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status       Boolean  @default(true)
+  zoomFolderId Int?
+  createdAt    DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
   children  Folder[] @relation("FolderToFolder")
   images    Image[]
@@ -336,20 +357,25 @@ model Image {
   folderId             String?
   slug                 String?   @unique
   status               Boolean   @default(true)
+  zoomFileId           Int?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   folder               Folder?   @relation(fields: [folderId], references: [id])
   profilePhotoProfiles Profile[] @relation("ProfilePhoto")
   nidPhotoProfiles     Profile[] @relation("NidPhotos")
+  blogCoverImages      Blog[]    @relation("BlogCoverImage")
+  blogThumbnails       Blog[]    @relation("BlogThumbnail")
 
   @@map("images")
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid())
+
   userId    String?
   comment   String?
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,12 +384,14 @@ model Comment {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid())
+
   userId    String?
   type      String?
   message   String?
   isRead    Boolean  @default(false)
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

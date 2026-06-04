@@ -45,6 +45,13 @@ const getAllBlog = async (query: any, actor: ActorContext) => {
     queryFilter.isPublished = queryFilter.isPublished === "true";
   }
 
+  if (queryFilter.category) {
+    const categories = typeof queryFilter.category === "string" 
+      ? [queryFilter.category] 
+      : queryFilter.category;
+    queryFilter.category = { hasSome: categories };
+  }
+
   const where: Prisma.BlogWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...queryFilter,

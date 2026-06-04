@@ -30,6 +30,10 @@ declare const _default: {
         password: string;
         mobile: string;
     };
+    zoomDigital: {
+        apiKey: string;
+        apiUrl: string;
+    };
 };
 export default _default;
 //# sourceMappingURL=index.d.ts.map

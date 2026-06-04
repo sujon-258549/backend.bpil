@@ -4,7 +4,7 @@ export declare const BlogServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        category: string | null;
+        category: string[];
         description: string | null;
         slug: string | null;
         title: string | null;
@@ -23,7 +23,7 @@ export declare const BlogServices: {
             createdAt: Date;
             updatedAt: Date;
             id: string;
-            category: string | null;
+            category: string[];
             description: string | null;
             slug: string | null;
             title: string | null;
@@ -47,7 +47,7 @@ export declare const BlogServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        category: string | null;
+        category: string[];
         description: string | null;
         slug: string | null;
         title: string | null;
@@ -65,7 +65,7 @@ export declare const BlogServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        category: string | null;
+        category: string[];
         description: string | null;
         slug: string | null;
         title: string | null;
@@ -86,7 +86,7 @@ export declare const BlogServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        category: string | null;
+        category: string[];
         description: string | null;
         slug: string | null;
         title: string | null;

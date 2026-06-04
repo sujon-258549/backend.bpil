@@ -70,6 +70,13 @@ const getAllRole = async (query: any, actor?: ActorContext) => {
     });
   }
 
+  // Exclude SUPER_ADMIN from role list
+  andCondition.push({
+    role: {
+      not: "SUPER_ADMIN",
+    },
+  });
+
   // Tenant scoping — non-platform users see only roles in their branch.
   if (actor && !isPlatformAdmin(actor.role)) {
     

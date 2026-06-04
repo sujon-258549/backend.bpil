@@ -40,4 +40,8 @@ export default {
     password: process.env.SUPER_ADMIN_PASSWORD!,
     mobile: process.env.SUPER_ADMIN_MOBILE!,
   },
+  zoomDigital: {
+    apiKey: process.env.ZOOM_DIGITAL_API_KEY!,
+    apiUrl: process.env.ZOOM_DIGITAL_API_URL!,
+  },
 };
