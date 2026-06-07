@@ -6,6 +6,7 @@ import { departmentSearchableFields } from "./department.const.ts";
 import prisma from "../../utils/prismaClient.ts";
 import type { ActorContext } from "../../utils/tenant.ts";
 import { isPlatformAdmin, tenantFilter, assertTenantAccess } from "../../utils/tenant.ts";
+import { logAction } from "../../utils/logger.service.ts";
 
 const createDepartmentIntoDB = async (payload: any, actor: ActorContext) => {
   const result = await prisma.department.create({
@@ -16,11 +17,14 @@ const createDepartmentIntoDB = async (payload: any, actor: ActorContext) => {
       
     },
   });
+
+  await logAction(actor.userId, "CREATE", "DEPARTMENT", result.id, null, result);
+
   return result;
 };
 
 const getAllDepartment = async (query: any, actor: ActorContext) => {
-  const { page, limit, searchTerm, sortBy, sortOrder, ...filter } = query;
+  const { page, limit, searchTerm, sortBy, sortOrder, startDate, endDate, ...filter } = query;
 
   const andCondition: Prisma.DepartmentWhereInput[] = [];
 
@@ -37,6 +41,14 @@ const getAllDepartment = async (query: any, actor: ActorContext) => {
 
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   const where: Prisma.DepartmentWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
@@ -96,6 +108,9 @@ const updateDepartment = async (
       isActive: payload.isActive,
     },
   });
+
+  await logAction(actor.userId, "UPDATE", "DEPARTMENT", id, existing, result);
+
   return result;
 };
 
@@ -103,6 +118,8 @@ const deleteDepartment = async (id: string, actor: ActorContext) => {
   const existing = await prisma.department.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Department not found");
 
+
+  await logAction(actor.userId, "DELETE", "DEPARTMENT", id, existing, null);
 
   const result = await prisma.department.delete({ where: { id } });
   return result;
@@ -117,6 +134,9 @@ const updateDepartmentStatus = async (id: string, actor: ActorContext) => {
     where: { id },
     data: { isActive: !existing.isActive },
   });
+
+  await logAction(actor.userId, "UPDATE", "DEPARTMENT", id, existing, result);
+
   return result;
 };
 

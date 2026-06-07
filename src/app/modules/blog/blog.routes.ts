@@ -1,14 +1,44 @@
 import express from "express";
 import { BlogControllers } from "./blog.controller.ts";
-
+import auth from "../../utils/auth.ts";
+import requirePermission from "../../middleware/requirePermission.ts";
 
 const router = express.Router();
 
-router.post("/", BlogControllers.createBlog);
-router.get("/",  BlogControllers.getAllBlog);
-router.get("/:id", BlogControllers.getBlogById);
-router.put("/:id", BlogControllers.updateBlog);
-router.delete("/:id", BlogControllers.deleteBlog);
-router.patch("/:id/status", BlogControllers.updateBlogStatus);
+// Anyone authenticated can read blogs
+router.get("/", auth(), BlogControllers.getAllBlog);
+router.get("/:id", auth(), BlogControllers.getBlogById);
+
+// Create — requires blog.create permission
+router.post(
+  "/",
+  auth(),
+  requirePermission("blog", "create"),
+  BlogControllers.createBlog,
+);
+
+// Update — requires blog.update permission
+router.put(
+  "/:id",
+  auth(),
+  requirePermission("blog", "update"),
+  BlogControllers.updateBlog,
+);
+
+// Publish / Unpublish — requires blog.publish permission
+router.patch(
+  "/:id/status",
+  auth(),
+  requirePermission("blog", "publish"),
+  BlogControllers.updateBlogStatus,
+);
+
+// Delete — requires blog.delete permission
+router.delete(
+  "/:id",
+  auth(),
+  requirePermission("blog", "delete"),
+  BlogControllers.deleteBlog,
+);
 
 export const BlogRoutes = router;

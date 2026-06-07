@@ -52,8 +52,8 @@ export declare const CommentServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        comment: string | null;
         userId: string | null;
+        comment: string | null;
     }>;
     getAllComments: (query: any, actor: ActorContext) => Promise<{
         data: ({
@@ -108,8 +108,8 @@ export declare const CommentServices: {
             createdAt: Date;
             updatedAt: Date;
             id: string;
-            comment: string | null;
             userId: string | null;
+            comment: string | null;
         })[];
         meta: {
             page: number;
@@ -169,16 +169,16 @@ export declare const CommentServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        comment: string | null;
         userId: string | null;
+        comment: string | null;
     }>;
     updateComment: (id: string, payload: any, actor: ActorContext) => Promise<{
         isDeleted: boolean;
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        comment: string | null;
         userId: string | null;
+        comment: string | null;
     }>;
     deleteComment: (id: string, actor: ActorContext) => Promise<{
         message: string;

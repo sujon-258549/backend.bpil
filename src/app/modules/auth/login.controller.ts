@@ -8,7 +8,9 @@ import config from "../../config/index.ts";
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
-  const result = await AuthServices.loginUser(payload);
+  const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const userAgent = req.headers["user-agent"] || "";
+  const result = await AuthServices.loginUser({ ...payload, ipAddress, userAgent });
   res.cookie("refreshToken", result.refreshToken, {
     secure: config.nodeEnv === "production",
     httpOnly: true,
@@ -70,6 +72,10 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.cookies.refreshToken || req.body.refreshToken;
+  if (payload) {
+    await AuthServices.logoutUser(payload);
+  }
   res.clearCookie("refreshToken", {
     secure: config.nodeEnv === "production",
     httpOnly: true,

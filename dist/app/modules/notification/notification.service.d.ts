@@ -5,10 +5,12 @@ export declare const NotificationServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string | null;
         message: string | null;
         userId: string | null;
+        type: string | null;
         isRead: boolean;
+    } | {
+        count: any;
     }>;
     getAllNotifications: (query: any, actor: ActorContext) => Promise<{
         data: {
@@ -16,9 +18,9 @@ export declare const NotificationServices: {
             createdAt: Date;
             updatedAt: Date;
             id: string;
-            type: string | null;
             message: string | null;
             userId: string | null;
+            type: string | null;
             isRead: boolean;
         }[];
         meta: {
@@ -32,9 +34,9 @@ export declare const NotificationServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string | null;
         message: string | null;
         userId: string | null;
+        type: string | null;
         isRead: boolean;
     }>;
     updateNotification: (id: string, payload: any, actor: ActorContext) => Promise<{
@@ -42,9 +44,9 @@ export declare const NotificationServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        type: string | null;
         message: string | null;
         userId: string | null;
+        type: string | null;
         isRead: boolean;
     }>;
     deleteNotification: (id: string, actor: ActorContext) => Promise<{

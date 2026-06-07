@@ -64,7 +64,6 @@ export const seedSuperAdmin = async () => {
     // 5. Create Super Admin with all relations
     await prisma.user.create({
       data: {
-        id: superAdminMobile, // Using mobile as ID as per your previous logic
         email: superAdminEmail,
         password: hashedPassword,
         mobile: superAdminMobile,

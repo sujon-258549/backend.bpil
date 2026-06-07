@@ -1,2 +1,2 @@
-export const departmentFilterableFields = ["searchTerm", "name"];
+export const departmentFilterableFields = ["searchTerm", "name", "startDate", "endDate"];
 export const departmentSearchableFields = ["name"];

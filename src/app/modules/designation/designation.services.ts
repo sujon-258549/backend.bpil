@@ -10,6 +10,7 @@ import {
   isPlatformAdmin,
   type ActorContext,
 } from "../../utils/tenant.ts";
+import { logAction } from "../../utils/logger.service.ts";
 
 // Designations are now per-tenant. Branch Super Admins create + see their
 // own list; other tenants can't see them. Platform admins can also create
@@ -42,11 +43,14 @@ const createDesignation = async (payload: any, actor?: ActorContext) => {
       
     },
   });
+
+  await logAction(actor?.userId, "CREATE", "DESIGNATION", result.id, null, result);
+
   return result;
 };
 
 const getAllDesignations = async (query: any, actor?: ActorContext) => {
-  const { page, limit, searchTerm, sortBy, sortOrder, ...filter } = query;
+  const { page, limit, searchTerm, sortBy, sortOrder, startDate, endDate, ...filter } = query;
 
   const andCondition: Prisma.DesignationWhereInput[] = [];
 
@@ -78,6 +82,14 @@ const getAllDesignations = async (query: any, actor?: ActorContext) => {
 
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   const where: Prisma.DesignationWhereInput =
     andCondition.length > 0 ? { AND: andCondition } : {};
@@ -134,6 +146,9 @@ const updateDesignation = async (
   if (payload.isActive !== undefined) data.isActive = payload.isActive;
 
   const result = await prisma.designation.update({ where: { id }, data });
+
+  await logAction(actor?.userId, "UPDATE", "DESIGNATION", id, existing, result);
+
   return result;
 };
 
@@ -141,6 +156,8 @@ const deleteDesignation = async (id: string, actor?: ActorContext) => {
   const existing = await prisma.designation.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Designation not found");
 
+
+  await logAction(actor?.userId, "DELETE", "DESIGNATION", id, existing, null);
 
   await prisma.designation.delete({ where: { id } });
   return { message: "Designation deleted successfully" };
@@ -155,6 +172,9 @@ const updateDesignationStatus = async (id: string, actor?: ActorContext) => {
     where: { id },
     data: { isActive: !existing.isActive },
   });
+
+  await logAction(actor?.userId, "UPDATE", "DESIGNATION", id, existing, result);
+
   return result;
 };
 

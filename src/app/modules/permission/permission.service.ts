@@ -47,11 +47,19 @@ const createPermission = async (payload: any, actor?: ActorContext) => {
 };
 
 const getAllPermission = async (query: any, actor?: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...queryFilter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...queryFilter } = query;
 
   const andCondition: Prisma.RolePermissionWhereInput[] = [];
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   if (searchTerm) {
     andCondition.push({

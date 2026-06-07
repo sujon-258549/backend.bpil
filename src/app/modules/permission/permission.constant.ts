@@ -6,5 +6,4 @@ export const permissionFilterableFields = [
   "page",
   "limit",
   "sortBy",
-  "sortOrder",
-];
+  "sortOrder", "startDate", "endDate"];

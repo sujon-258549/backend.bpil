@@ -34,14 +34,29 @@ const auth = (...requiredRoles: UserRoleValue[]) => {
     }
 
     const email = decoded?.data?.email || "";
+    const sessionId = decoded?.data?.sessionId;
     const { iat, exp } = decoded as { iat: number; exp: number };
     const remainingTime = exp - Math.floor(Date.now() / 1000);
     console.log(`🔍 [Auth] Token for ${email} expires in: ${remainingTime}s`);
 
+    if (sessionId) {
+      const activeSession = await prisma.loginHistory.findUnique({
+        where: { id: sessionId }
+      });
+      if (!activeSession || !activeSession.isActive) {
+        throw new ApiError(status.UNAUTHORIZED, "🔍❓ Unauthorized: Session is inactive or logged out");
+      }
+    }
+
     const existingUser = await prisma.user.findFirst({
       where: { email },
-      include: { role: true },
+      include: {
+        role: true,
+        profile: { select: { name: true } },
+      },
     });
+
+    console.log("existingUser", existingUser);
 
     if (!existingUser) {
       throw new ApiError(status.UNAUTHORIZED, "🔍❓ Unauthorized: User not found");
@@ -78,6 +93,7 @@ const auth = (...requiredRoles: UserRoleValue[]) => {
       email: existingUser.email ?? "",
       role: userRoleString,
       mobile: existingUser.mobile ?? "",
+      name: (existingUser as any).profile?.name ?? "",
     };
 
     // Tenant context resolution removed for single project mode.

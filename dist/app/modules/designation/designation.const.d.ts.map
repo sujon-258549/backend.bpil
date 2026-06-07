@@ -1,1 +1,1 @@
-{"version":3,"file":"designation.const.d.ts","sourceRoot":"","sources":["../../../../src/app/modules/designation/designation.const.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,2BAA2B,UAAqC,CAAC;AAC9E,eAAO,MAAM,2BAA2B,UAA0B,CAAC"}
+{"version":3,"file":"designation.const.d.ts","sourceRoot":"","sources":["../../../../src/app/modules/designation/designation.const.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,2BAA2B,UAA6D,CAAC;AACtG,eAAO,MAAM,2BAA2B,UAA0B,CAAC"}

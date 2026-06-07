@@ -14,6 +14,7 @@ router.delete("/:id", FolderController.deleteFolder);
 
 router.post("/upload", upload.single("file"), FolderController.uploadFile);
 router.get("/image/:id", FolderController.getImageProxy);
+router.get("/image/:id/details", FolderController.getImageDetails);
 router.put("/image/:id", FolderController.updateImage);
 router.delete("/image/:id", FolderController.deleteImage);
 

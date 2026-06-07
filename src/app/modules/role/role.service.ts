@@ -9,6 +9,7 @@ import {
   isPlatformAdmin,
   type ActorContext,
 } from "../../utils/tenant.ts";
+import { logAction } from "../../utils/logger.service.ts";
 
 // Roles are now per-tenant. Branch Super Admins create + see roles for
 // their own branch only. Platform admins can also create global roles
@@ -26,10 +27,6 @@ const createRole = async (payload: any, actor?: ActorContext) => {
       "SUPER_ADMIN role must exist before creating any other roles",
     );
   }
-  const branchId =
-    actor && !isPlatformAdmin(actor.role)
-      ? null : null;
-
   const isExist = await prisma.allRole.findFirst({
     where: { role: payload.role },
   });
@@ -37,17 +34,28 @@ const createRole = async (payload: any, actor?: ActorContext) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Role already exists");
   }
   const result = await prisma.allRole.create({
-    data: { ...payload, branchId },
+    data: { ...payload },
   });
+
+  await logAction(actor?.userId, "CREATE", "ROLE", result.id, null, result);
+
   return result;
 };
 
 const getAllRole = async (query: any, actor?: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...queryFilter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...queryFilter } = query;
 
   const andCondition: Prisma.AllRoleWhereInput[] = [];
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   if (searchTerm) {
     andCondition.push({
@@ -119,24 +127,14 @@ const getRoleById = async (id: string, actor?: ActorContext) => {
 const updateRole = async (id: string, payload: any, actor?: ActorContext) => {
   const existing = await prisma.allRole.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
-  if (actor) {
-
-    if (
-      !isPlatformAdmin(actor.role) &&
-      payload.branchId &&
-      payload.branchId !== null
-    ) {
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        "Cannot move a role to another branch",
-      );
-    }
-  }
 
   const result = await prisma.allRole.update({
     where: { id },
     data: payload,
   });
+
+  await logAction(actor?.userId, "UPDATE", "ROLE", id, existing, result);
+
   return result;
 };
 
@@ -144,6 +142,8 @@ const deleteRole = async (id: string, actor?: ActorContext) => {
   const existing = await prisma.allRole.findUnique({ where: { id } });
   if (!existing) throw new ApiError(httpStatus.NOT_FOUND, "Role not found");
 
+
+  await logAction(actor?.userId, "DELETE", "ROLE", id, existing, null);
 
   await prisma.allRole.delete({ where: { id } });
   return { message: "Role deleted successfully" };
@@ -160,6 +160,9 @@ const updateRoleStatus = async (id: string, actor?: ActorContext) => {
     where: { id },
     data: { isActive: !isExist.isActive },
   });
+
+  await logAction(actor?.userId, "UPDATE", "ROLE", id, isExist, result);
+
   return result;
 };
 

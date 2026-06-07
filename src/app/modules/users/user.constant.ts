@@ -25,5 +25,4 @@ export const userFilterableFields = [
   "page",
   "limit",
   "sortBy",
-  "sortOrder",
-];
+  "sortOrder", "startDate", "endDate"];

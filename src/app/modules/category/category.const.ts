@@ -12,5 +12,4 @@ export const categoryFilterableFields = [
   "page",
   "limit",
   "sortBy",
-  "sortOrder",
-];
+  "sortOrder", "startDate", "endDate"];

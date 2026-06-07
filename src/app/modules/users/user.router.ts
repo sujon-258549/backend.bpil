@@ -54,4 +54,16 @@ router.patch(
   requirePermission("employees", "update"),
   UserController.blockUser,
 );
+router.delete(
+  "/sessions/:id",
+  auth(),
+  requirePermission("employees", "update"),
+  UserController.forceLogoutSession,
+);
+router.get(
+  "/:id/login-history",
+  auth(),
+  requirePermission("employees", "read"),
+  UserController.getUserLoginHistory,
+);
 export const UserRouter = router;

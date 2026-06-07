@@ -74,7 +74,18 @@ export declare const FolderServices: {
         zoomFileId: number | null;
     } | undefined>;
     getImageProxy: (id: string) => Promise<{
-        url: any;
+        url: string;
+    }>;
+    getImageDetails: (id: string, actor?: ActorContext) => Promise<{
+        name: string | null;
+        url: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        id: string;
+        slug: string | null;
+        folderId: string | null;
+        status: boolean;
+        zoomFileId: number | null;
     }>;
     updateImage: (id: string, payload: {
         name: string;

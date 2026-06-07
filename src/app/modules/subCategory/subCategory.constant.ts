@@ -13,8 +13,7 @@ export const subCategoryFilterableFields = [
   "limit",
   "sortBy",
   "sortOrder",
-  "categoryId",
-];
+  "categoryId", "startDate", "endDate"];
 export const subCategorySearchableFields = [
   "slug",
   "name",

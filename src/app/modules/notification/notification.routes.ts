@@ -25,7 +25,13 @@ router.get(
 
 router.patch(
   "/mark-as-read",
-  auth(USER_ROLE.USER, USER_ROLE.WORKER, USER_ROLE.EMPLOYEE),
+  auth(
+    USER_ROLE.USER, 
+    USER_ROLE.WORKER, 
+    USER_ROLE.EMPLOYEE,
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUPER_ADMIN
+  ),
   NotificationControllers.markAsRead,
 );
 

@@ -7,7 +7,7 @@ import { blogFilterableFields } from "./blog.constant.ts";
 import { actorFromReq } from "../../utils/tenant.ts";
 
 const createBlog = catchAsync(async (req, res) => {
-  const result = await BlogServices.createBlog(req.body, actorFromReq(req));
+  const result = await BlogServices.createBlog(req.body, req.user);
   return sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -18,7 +18,7 @@ const createBlog = catchAsync(async (req, res) => {
 
 const getAllBlog = catchAsync(async (req, res) => {
   const query = pick(req.query, blogFilterableFields);
-  const result = await BlogServices.getAllBlog(query, actorFromReq(req));
+  const result = await BlogServices.getAllBlog(query, req.user);
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -31,7 +31,7 @@ const getAllBlog = catchAsync(async (req, res) => {
 const getBlogById = catchAsync(async (req, res) => {
   const result = await BlogServices.getBlogById(
     req.params.id as string,
-    actorFromReq(req),
+    req.user,
   );
   return sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -45,7 +45,7 @@ const updateBlog = catchAsync(async (req, res) => {
   const result = await BlogServices.updateBlog(
     req.params.id as string,
     req.body,
-    actorFromReq(req),
+    req.user,
   );
   return sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -58,7 +58,7 @@ const updateBlog = catchAsync(async (req, res) => {
 const updateBlogStatus = catchAsync(async (req, res) => {
   const result = await BlogServices.updateBlogStatus(
     req.params.id as string,
-    actorFromReq(req),
+    req.user,
   );
   return sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -71,7 +71,7 @@ const updateBlogStatus = catchAsync(async (req, res) => {
 const deleteBlog = catchAsync(async (req, res) => {
   const result = await BlogServices.deleteBlog(
     req.params.id as string,
-    actorFromReq(req),
+    req.user,
   );
   return sendResponse(res, {
     statusCode: httpStatus.OK,

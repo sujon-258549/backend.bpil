@@ -23,7 +23,6 @@ export declare const AuthServices: {
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: (string | null)[] | undefined;
                 mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
@@ -31,6 +30,7 @@ export declare const AuthServices: {
                 passwordChanged?: boolean;
                 passwordChangeTime?: Date | null;
                 experience?: string | null;
+                workType?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
                 availableTime?: string | null;
@@ -46,6 +46,7 @@ export declare const AuthServices: {
     }>;
     refreshToken: (token: string) => Promise<{
         accessToken: never;
+        refreshToken: never;
         user: {
             id: string;
             email: string | null;
@@ -67,7 +68,6 @@ export declare const AuthServices: {
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: (string | null)[] | undefined;
                 mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
@@ -75,6 +75,7 @@ export declare const AuthServices: {
                 passwordChanged?: boolean;
                 passwordChangeTime?: Date | null;
                 experience?: string | null;
+                workType?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
                 availableTime?: string | null;
@@ -87,6 +88,7 @@ export declare const AuthServices: {
             permissions: import("../../utils/userPermissions.ts").PermissionRow[];
         };
     }>;
+    logoutUser: (refreshToken: string) => Promise<void>;
     forgotPassword: (payload: {
         email: string;
     }) => Promise<{
@@ -116,7 +118,6 @@ export declare const AuthServices: {
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: (string | null)[] | undefined;
                 mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
@@ -124,6 +125,7 @@ export declare const AuthServices: {
                 passwordChanged?: boolean;
                 passwordChangeTime?: Date | null;
                 experience?: string | null;
+                workType?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
                 availableTime?: string | null;

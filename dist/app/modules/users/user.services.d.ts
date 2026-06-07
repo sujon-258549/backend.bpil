@@ -1,6 +1,6 @@
 import { type ActorContext } from "../../utils/tenant.ts";
 export declare const UserServices: {
-    createUserIntoDB: (payload: any) => Promise<any>;
+    createUserIntoDB: (payload: any, actor?: ActorContext) => Promise<any>;
     getUserById: (id: string, actor?: ActorContext) => Promise<{
         password: undefined;
         permissions: import("../../utils/userPermissions.ts").PermissionRow[];
@@ -12,13 +12,13 @@ export declare const UserServices: {
             }[];
             id: string;
         } | null;
-        department: {
-            name: string | null;
+        address: {
+            mobile: string | null;
             id: string;
-        } | null;
-        designation: {
-            name: string;
-            id: string;
+            address: string | null;
+            division: string | null;
+            district: string | null;
+            upazila: string | null;
         } | null;
         profile: ({
             profilePhoto: {
@@ -46,20 +46,7 @@ export declare const UserServices: {
             nidVerified: boolean;
             serialId: string | null;
         }) | null;
-        address: {
-            mobile: string | null;
-            id: string;
-            address: string | null;
-            division: string | null;
-            district: string | null;
-            upazila: string | null;
-        } | null;
-        workInfo: ({
-            subCategories: {
-                name: string | null;
-                id: string;
-            }[];
-        } & {
+        workInfo: {
             mobile: string | null;
             isBlocked: boolean;
             isDeleted: boolean;
@@ -67,11 +54,28 @@ export declare const UserServices: {
             passwordChanged: boolean;
             passwordChangeTime: Date | null;
             experience: string | null;
+            workType: string | null;
             workStartTime: string | null;
             workTimeLimit: string | null;
             availableTime: string | null;
             verified: boolean;
-        }) | null;
+        } | null;
+        department: {
+            name: string | null;
+            id: string;
+        } | null;
+        loginHistories: {
+            id: string;
+            deviceType: string | null;
+            os: string | null;
+            browser: string | null;
+            ipAddress: string | null;
+            loggedInAt: Date | null;
+        }[];
+        designation: {
+            name: string;
+            id: string;
+        } | null;
         email: string | null;
         mobile: string | null;
         isBlocked: boolean;
@@ -109,13 +113,13 @@ export declare const UserServices: {
                 }[];
                 id: string;
             } | null;
-            department: {
-                name: string | null;
+            address: {
+                mobile: string | null;
                 id: string;
-            } | null;
-            designation: {
-                name: string;
-                id: string;
+                address: string | null;
+                division: string | null;
+                district: string | null;
+                upazila: string | null;
             } | null;
             profile: ({
                 profilePhoto: {
@@ -143,20 +147,7 @@ export declare const UserServices: {
                 nidVerified: boolean;
                 serialId: string | null;
             }) | null;
-            address: {
-                mobile: string | null;
-                id: string;
-                address: string | null;
-                division: string | null;
-                district: string | null;
-                upazila: string | null;
-            } | null;
-            workInfo: ({
-                subCategories: {
-                    name: string | null;
-                    id: string;
-                }[];
-            } & {
+            workInfo: {
                 mobile: string | null;
                 isBlocked: boolean;
                 isDeleted: boolean;
@@ -164,11 +155,28 @@ export declare const UserServices: {
                 passwordChanged: boolean;
                 passwordChangeTime: Date | null;
                 experience: string | null;
+                workType: string | null;
                 workStartTime: string | null;
                 workTimeLimit: string | null;
                 availableTime: string | null;
                 verified: boolean;
-            }) | null;
+            } | null;
+            department: {
+                name: string | null;
+                id: string;
+            } | null;
+            loginHistories: {
+                id: string;
+                deviceType: string | null;
+                os: string | null;
+                browser: string | null;
+                ipAddress: string | null;
+                loggedInAt: Date | null;
+            }[];
+            designation: {
+                name: string;
+                id: string;
+            } | null;
             email: string | null;
             mobile: string | null;
             isBlocked: boolean;
@@ -210,13 +218,13 @@ export declare const UserServices: {
             }[];
             id: string;
         } | null;
-        department: {
-            name: string | null;
+        address: {
+            mobile: string | null;
             id: string;
-        } | null;
-        designation: {
-            name: string;
-            id: string;
+            address: string | null;
+            division: string | null;
+            district: string | null;
+            upazila: string | null;
         } | null;
         profile: ({
             profilePhoto: {
@@ -244,20 +252,7 @@ export declare const UserServices: {
             nidVerified: boolean;
             serialId: string | null;
         }) | null;
-        address: {
-            mobile: string | null;
-            id: string;
-            address: string | null;
-            division: string | null;
-            district: string | null;
-            upazila: string | null;
-        } | null;
-        workInfo: ({
-            subCategories: {
-                name: string | null;
-                id: string;
-            }[];
-        } & {
+        workInfo: {
             mobile: string | null;
             isBlocked: boolean;
             isDeleted: boolean;
@@ -265,11 +260,20 @@ export declare const UserServices: {
             passwordChanged: boolean;
             passwordChangeTime: Date | null;
             experience: string | null;
+            workType: string | null;
             workStartTime: string | null;
             workTimeLimit: string | null;
             availableTime: string | null;
             verified: boolean;
-        }) | null;
+        } | null;
+        department: {
+            name: string | null;
+            id: string;
+        } | null;
+        designation: {
+            name: string;
+            id: string;
+        } | null;
     } & {
         email: string | null;
         mobile: string | null;
@@ -309,13 +313,13 @@ export declare const UserServices: {
             }[];
             id: string;
         } | null;
-        department: {
-            name: string | null;
+        address: {
+            mobile: string | null;
             id: string;
-        } | null;
-        designation: {
-            name: string;
-            id: string;
+            address: string | null;
+            division: string | null;
+            district: string | null;
+            upazila: string | null;
         } | null;
         profile: ({
             profilePhoto: {
@@ -343,20 +347,7 @@ export declare const UserServices: {
             nidVerified: boolean;
             serialId: string | null;
         }) | null;
-        address: {
-            mobile: string | null;
-            id: string;
-            address: string | null;
-            division: string | null;
-            district: string | null;
-            upazila: string | null;
-        } | null;
-        workInfo: ({
-            subCategories: {
-                name: string | null;
-                id: string;
-            }[];
-        } & {
+        workInfo: {
             mobile: string | null;
             isBlocked: boolean;
             isDeleted: boolean;
@@ -364,11 +355,20 @@ export declare const UserServices: {
             passwordChanged: boolean;
             passwordChangeTime: Date | null;
             experience: string | null;
+            workType: string | null;
             workStartTime: string | null;
             workTimeLimit: string | null;
             availableTime: string | null;
             verified: boolean;
-        }) | null;
+        } | null;
+        department: {
+            name: string | null;
+            id: string;
+        } | null;
+        designation: {
+            name: string;
+            id: string;
+        } | null;
         email: string | null;
         mobile: string | null;
         isBlocked: boolean;
@@ -406,13 +406,13 @@ export declare const UserServices: {
             }[];
             id: string;
         } | null;
-        department: {
-            name: string | null;
+        address: {
+            mobile: string | null;
             id: string;
-        } | null;
-        designation: {
-            name: string;
-            id: string;
+            address: string | null;
+            division: string | null;
+            district: string | null;
+            upazila: string | null;
         } | null;
         profile: ({
             profilePhoto: {
@@ -440,20 +440,7 @@ export declare const UserServices: {
             nidVerified: boolean;
             serialId: string | null;
         }) | null;
-        address: {
-            mobile: string | null;
-            id: string;
-            address: string | null;
-            division: string | null;
-            district: string | null;
-            upazila: string | null;
-        } | null;
-        workInfo: ({
-            subCategories: {
-                name: string | null;
-                id: string;
-            }[];
-        } & {
+        workInfo: {
             mobile: string | null;
             isBlocked: boolean;
             isDeleted: boolean;
@@ -461,11 +448,20 @@ export declare const UserServices: {
             passwordChanged: boolean;
             passwordChangeTime: Date | null;
             experience: string | null;
+            workType: string | null;
             workStartTime: string | null;
             workTimeLimit: string | null;
             availableTime: string | null;
             verified: boolean;
-        }) | null;
+        } | null;
+        department: {
+            name: string | null;
+            id: string;
+        } | null;
+        designation: {
+            name: string;
+            id: string;
+        } | null;
         email: string | null;
         mobile: string | null;
         isBlocked: boolean;
@@ -519,7 +515,6 @@ export declare const UserServices: {
                 upazila: string | null;
             } | null;
             workInfo: {
-                subCategories: (string | null)[] | undefined;
                 mobile?: string | null;
                 isBlocked?: boolean;
                 isDeleted?: boolean;
@@ -527,6 +522,7 @@ export declare const UserServices: {
                 passwordChanged?: boolean;
                 passwordChangeTime?: Date | null;
                 experience?: string | null;
+                workType?: string | null;
                 workStartTime?: string | null;
                 workTimeLimit?: string | null;
                 availableTime?: string | null;
@@ -624,5 +620,32 @@ export declare const UserServices: {
         loginTryTime: Date | null;
         departmentId: string | null;
     }>;
+    forceLogoutSession: (historyId: string) => Promise<{
+        message: string;
+    }>;
+    getUserLoginHistory: (userId: string) => Promise<{
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        id: string;
+        userId: string | null;
+        refreshToken: string | null;
+        status: import("../../../generated/prisma/index.js").$Enums.LoginStatus | null;
+        deviceId: string | null;
+        deviceName: string | null;
+        deviceType: string | null;
+        os: string | null;
+        osVersion: string | null;
+        browser: string | null;
+        browserVersion: string | null;
+        userAgent: string | null;
+        ipAddress: string | null;
+        location: string | null;
+        country: string | null;
+        city: string | null;
+        failureReason: string | null;
+        loggedInAt: Date | null;
+        loggedOutAt: Date | null;
+    }[]>;
 };
 //# sourceMappingURL=user.services.d.ts.map

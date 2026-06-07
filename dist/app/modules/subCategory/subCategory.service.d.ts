@@ -8,8 +8,8 @@ export declare const SubCategoryServices: {
         description: string | null;
         slug: string | null;
         status: boolean;
-        categoryId: string | null;
         icon: string | null;
+        categoryId: string | null;
     }>;
     getAllSubCategory: (query: any, actor?: ActorContext) => Promise<{
         data: ({
@@ -25,8 +25,8 @@ export declare const SubCategoryServices: {
             description: string | null;
             slug: string | null;
             status: boolean;
-            categoryId: string | null;
             icon: string | null;
+            categoryId: string | null;
         })[];
         meta: {
             page: number;
@@ -48,8 +48,8 @@ export declare const SubCategoryServices: {
         description: string | null;
         slug: string | null;
         status: boolean;
-        categoryId: string | null;
         icon: string | null;
+        categoryId: string | null;
     }>;
     getSubCategoryBySlug: (slug: string) => Promise<{
         category: {
@@ -65,8 +65,8 @@ export declare const SubCategoryServices: {
         description: string | null;
         slug: string | null;
         status: boolean;
-        categoryId: string | null;
         icon: string | null;
+        categoryId: string | null;
     }>;
     updateSubCategory: (id: string, payload: any, actor?: ActorContext) => Promise<{
         name: string | null;
@@ -76,8 +76,8 @@ export declare const SubCategoryServices: {
         description: string | null;
         slug: string | null;
         status: boolean;
-        categoryId: string | null;
         icon: string | null;
+        categoryId: string | null;
     }>;
     deleteSubCategory: (id: string, actor?: ActorContext) => Promise<{
         message: string;
@@ -90,8 +90,8 @@ export declare const SubCategoryServices: {
         description: string | null;
         slug: string | null;
         status: boolean;
-        categoryId: string | null;
         icon: string | null;
+        categoryId: string | null;
     }>;
 };
 //# sourceMappingURL=subCategory.service.d.ts.map

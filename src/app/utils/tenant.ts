@@ -5,6 +5,8 @@ import httpStatus from "http-status";
 export type ActorContext = {
   userId: string;
   role: string | undefined;
+  email?: string | undefined;
+  name?: string | undefined;
 };
 
 export const isPlatformAdmin = (role: string | undefined): boolean =>
@@ -30,4 +32,6 @@ import type { Request } from "express";
 export const actorFromReq = (req: Request): ActorContext => ({
   userId: req.user?.id as string,
   role: req.user?.role,
+  email: req.user?.email,
+  name: (req.user as any)?.name,
 });

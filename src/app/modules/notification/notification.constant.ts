@@ -5,4 +5,6 @@ export const notificationFilterableFields = [
   "userId",
   "type",
   "isRead",
+  "startDate",
+  "endDate",
 ];

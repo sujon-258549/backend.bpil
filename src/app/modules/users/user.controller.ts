@@ -10,7 +10,8 @@ import { actorFromReq } from "../../utils/tenant.ts";
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const result = await UserServices.createUserIntoDB(payload);
+    const actor = actorFromReq(req);
+    const result = await UserServices.createUserIntoDB(payload, actor);
     sendResponse(res, {
       success: true,
       statusCode: status.CREATED,
@@ -147,6 +148,27 @@ const blockUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const forceLogoutSession = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await UserServices.forceLogoutSession(id as string);
+  sendResponse(res, {
+    success: true,
+    statusCode: status.OK,
+    message: "Session forcefully logged out successfully",
+    data: result,
+  });
+});
+
+const getUserLoginHistory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await UserServices.getUserLoginHistory(id as string);
+  sendResponse(res, {
+    success: true,
+    statusCode: status.OK,
+    message: "Login history fetched successfully",
+    data: result,
+  });
+});
 
 export const UserController = {
   createUser,
@@ -159,4 +181,6 @@ export const UserController = {
   deleteUser,
   softDeleteUser,
   blockUser,
+  forceLogoutSession,
+  getUserLoginHistory,
 };

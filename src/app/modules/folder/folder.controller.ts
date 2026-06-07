@@ -96,6 +96,19 @@ const getImageProxy = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+const getImageDetails = catchAsync(async (req: Request, res: Response) => {
+  const result = await FolderServices.getImageDetails(
+    req.params.id as string,
+    actorFromReq(req)
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Image details retrieved successfully",
+    data: result,
+  });
+});
+
 const updateImage = catchAsync(async (req: Request, res: Response) => {
   const result = await FolderServices.updateImage(
     req.params.id as string,
@@ -131,6 +144,7 @@ export const FolderController = {
   deleteFolder,
   uploadFile,
   getImageProxy,
+  getImageDetails,
   updateImage,
   deleteImage,
 };

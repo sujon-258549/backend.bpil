@@ -15,6 +15,7 @@ import {
   tenantFilter,
   type ActorContext,
 } from "../../utils/tenant.ts";
+import { logAction } from "../../utils/logger.service.ts";
 
 // Role select shape reused across every user fetch — includes the joined
 // RolePermission rows so a flat `permissions` array can be derived per user.
@@ -57,7 +58,7 @@ function normalizeCategoriesInput(raw: unknown): string[] {
 
 // create user
 
-const createUserIntoDB = async (payload: any) => {
+const createUserIntoDB = async (payload: any, actor?: ActorContext) => {
   const { user, profile, address, workInfo } = payload;
 
   if (!user.roleId) {
@@ -92,11 +93,24 @@ const createUserIntoDB = async (payload: any) => {
     // Create Profile
     if (profile) {
       const { dob, age, nidPhotoIds, nidPhotoUrls, ...profileRest } = profile;
+      
+      let calculatedAge = age ? Number(age) : undefined;
+      let parsedDob = dob ? new Date(dob) : undefined;
+      if (parsedDob && !isNaN(parsedDob.getTime())) {
+        const today = new Date();
+        let a = today.getFullYear() - parsedDob.getFullYear();
+        const m = today.getMonth() - parsedDob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < parsedDob.getDate())) {
+          a--;
+        }
+        calculatedAge = Math.max(0, a);
+      }
+
       await tc.profile.create({
         data: {
           ...profileRest,
-          dob: dob ? new Date(dob) : undefined,
-          age: age ? Number(age) : undefined,
+          dob: parsedDob,
+          age: calculatedAge,
           mobile: user.mobile,
           nidPhoto: nidPhotoUrls || [],
           nidPhotos:
@@ -126,13 +140,6 @@ const createUserIntoDB = async (payload: any) => {
         data: {
           ...workInfoRest,
           mobile: user.mobile,
-          subCategories:
-            subCategoryIds && subCategoryIds.length > 0
-              ? {
-                  connect: subCategoryIds.map((id: string) => ({ id })),
-                }
-              : undefined,
-          
         },
       });
     }
@@ -175,23 +182,24 @@ const createUserIntoDB = async (payload: any) => {
           },
         },
         address: true,
-        workInfo: {
-          include: {
-            subCategories: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-            
-          },
-        },
+        workInfo: true,
       },
     });
   });
 
   if (result) {
     const { password, ...userWithoutPassword } = result as any;
+    
+    // Log the creation
+    await logAction(
+      actor?.userId,
+      "CREATE",
+      "EMPLOYEE",
+      result.id,
+      null,
+      userWithoutPassword
+    );
+
     return userWithoutPassword;
   }
 
@@ -200,11 +208,19 @@ const createUserIntoDB = async (payload: any) => {
 
 // get all users
 const getAllUsers = async (query: any, actor?: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...queryFilter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...queryFilter } = query;
 
   const andCondition: Prisma.UserWhereInput[] = [];
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   if (query.searchTerm) {
     andCondition.push({
@@ -291,17 +307,19 @@ const getAllUsers = async (query: any, actor?: ActorContext) => {
         },
       },
       address: true,
-      workInfo: {
-        include: {
-          subCategories: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          
+      workInfo: true,
+      loginHistories: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          os: true,
+          browser: true,
+          deviceType: true,
+          ipAddress: true,
+          loggedInAt: true,
         },
-      },
+        orderBy: { loggedInAt: "desc" }
+      }
     },
   });
 
@@ -356,17 +374,19 @@ const getUserById = async (id: string, actor?: ActorContext) => {
         },
       },
       address: true,
-      workInfo: {
-        include: {
-          subCategories: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          
+      workInfo: true,
+      loginHistories: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          os: true,
+          browser: true,
+          deviceType: true,
+          ipAddress: true,
+          loggedInAt: true,
         },
-      },
+        orderBy: { loggedInAt: "desc" }
+      }
     },
   });
   if (!user) return user;
@@ -431,6 +451,12 @@ const updateUser = async (
     }
   }
 
+  // Keep a copy of previous state for logging
+  const previousState = await prisma.user.findUnique({
+    where: { id },
+    include: { profile: true, address: true, workInfo: true }
+  });
+
   const updateData: Record<string, unknown> = {};
   const userScalarKeys = [
     "email",
@@ -475,15 +501,13 @@ const updateUser = async (
   if (workInfo) {
     const { subCategoryIds, ...workInfoRest } = workInfo;
     workInfoUpdate = {
-      update: {
-        ...workInfoRest,
-        subCategories:
-          subCategoryIds && subCategoryIds.length > 0
-            ? {
-                set: subCategoryIds.map((id: string) => ({ id })),
-              }
-            : undefined,
-        
+      upsert: {
+        create: {
+          ...workInfoRest,
+        },
+        update: {
+          ...workInfoRest,
+        },
       },
     };
   }
@@ -492,18 +516,45 @@ const updateUser = async (
   let profileUpdate = undefined;
   if (profile) {
     const { dob, age, nidPhotoIds, nidPhotoUrls, ...profileRest } = profile;
+    
+    let calculatedAge = age ? Number(age) : undefined;
+    let parsedDob = dob ? new Date(dob) : undefined;
+    if (parsedDob && !isNaN(parsedDob.getTime())) {
+      const today = new Date();
+      let a = today.getFullYear() - parsedDob.getFullYear();
+      const m = today.getMonth() - parsedDob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < parsedDob.getDate())) {
+        a--;
+      }
+      calculatedAge = Math.max(0, a);
+    }
+
+    const profileData = {
+      ...profileRest,
+      dob: parsedDob,
+      age: calculatedAge,
+      nidPhoto: nidPhotoUrls || [],
+    };
     profileUpdate = {
-      update: {
-        ...profileRest,
-        dob: dob ? new Date(dob) : undefined,
-        age: age ? Number(age) : undefined,
-        nidPhoto: nidPhotoUrls || [],
-        nidPhotos:
-          nidPhotoIds && nidPhotoIds.length > 0
-            ? {
-                set: nidPhotoIds.map((id: string) => ({ id })),
-              }
-            : undefined,
+      upsert: {
+        create: {
+          ...profileData,
+          nidPhotos:
+            nidPhotoIds && nidPhotoIds.length > 0
+              ? {
+                  connect: nidPhotoIds.map((id: string) => ({ id })),
+                }
+              : undefined,
+        },
+        update: {
+          ...profileData,
+          nidPhotos:
+            nidPhotoIds && nidPhotoIds.length > 0
+              ? {
+                  set: nidPhotoIds.map((id: string) => ({ id })),
+                }
+              : undefined,
+        },
       },
     };
   }
@@ -513,7 +564,10 @@ const updateUser = async (
     profile: profileUpdate,
     address: address
       ? {
-          update: address,
+          upsert: {
+            create: address,
+            update: address,
+          },
         }
       : undefined,
     workInfo: workInfoUpdate,
@@ -561,19 +615,21 @@ const updateUser = async (
         },
       },
       address: true,
-      workInfo: {
-        include: {
-          subCategories: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          
-        },
-      },
+      workInfo: true,
     },
   });
+
+  if (result && previousState) {
+    await logAction(
+      actor?.userId,
+      "UPDATE",
+      "EMPLOYEE",
+      id,
+      previousState,
+      result
+    );
+  }
+
   return result;
 };
 
@@ -616,17 +672,7 @@ const getMyData = async (id: string) => {
         },
       },
       address: true,
-      workInfo: {
-        include: {
-          subCategories: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          
-        },
-      },
+      workInfo: true,
     },
   });
   const { password, ...rest } = user;
@@ -668,11 +714,7 @@ const changePassword = async (
           profilePhoto: true,
         },
       },
-      workInfo: {
-        include: {
-          subCategories: true,
-                  },
-      },
+      workInfo: true,
       department: true,
       address: true,
     },
@@ -718,11 +760,7 @@ const changePassword = async (
           profilePhoto: true,
         },
       },
-      workInfo: {
-        include: {
-          subCategories: true,
-                  },
-      },
+      workInfo: true,
       department: true,
       address: true,
     },
@@ -771,8 +809,6 @@ const changePassword = async (
       address: updatedUser.address,
       workInfo: {
         ...updatedUser.workInfo,
-        subCategories: updatedUser.workInfo?.subCategories?.map((s) => s.name),
-        
       },
       isActive: updatedUser.isActive,
       isVerified: updatedUser.isVerified,
@@ -881,6 +917,50 @@ const blockUser = async (
   return deletedUser;
 };
 
+const forceLogoutSession = async (historyId: string) => {
+  const history = await prisma.loginHistory.findUnique({
+    where: { id: historyId }
+  });
+
+  if (!history || !history.isActive) {
+    throw new ApiError(status.NOT_FOUND, "🔍❓ Session not found or already inactive");
+  }
+
+  await prisma.loginHistory.update({
+    where: { id: historyId },
+    data: {
+      isActive: false,
+      loggedOutAt: new Date(),
+      refreshToken: null
+    }
+  });
+
+  if (history.userId) {
+    const activeSessionsCount = await prisma.loginHistory.count({
+      where: { userId: history.userId, isActive: true }
+    });
+    await prisma.user.update({
+      where: { id: history.userId },
+      data: { loginCount: activeSessionsCount }
+    });
+  }
+
+  return { message: "Session forcefully logged out" };
+};
+
+const getUserLoginHistory = async (userId: string) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new ApiError(status.NOT_FOUND, "User not found");
+
+  const histories = await prisma.loginHistory.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 100 // Limit to latest 100 records for performance
+  });
+
+  return histories;
+};
+
 export const UserServices = {
   createUserIntoDB,
   getUserById,
@@ -893,4 +973,6 @@ export const UserServices = {
   deleteUser,
   softDeleteUser,
   blockUser,
+  forceLogoutSession,
+  getUserLoginHistory,
 };

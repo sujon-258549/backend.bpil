@@ -1,3 +1,3 @@
 export const commentSearchableFields = ["comment"];
 
-export const commentFilterableFields = ["searchTerm", "userId"];
+export const commentFilterableFields = ["searchTerm", "userId", "startDate", "endDate"];

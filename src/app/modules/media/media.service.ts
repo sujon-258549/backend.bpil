@@ -42,7 +42,7 @@ const buildFolderTree = (
 };
 
 const getAllFolders = async (query: any, actor?: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...filter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...filter } = query;
 
   const andCondition: Prisma.FolderWhereInput[] = [];
 
@@ -72,6 +72,14 @@ const getAllFolders = async (query: any, actor?: ActorContext) => {
 
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   // Fetch ALL folders matching the condition to build the tree
   const allFolders = await prisma.folder.findMany({

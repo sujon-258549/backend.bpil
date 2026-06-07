@@ -9,27 +9,64 @@ import type { ActorContext } from "../../utils/tenant.ts";
 import { tenantFilter, assertTenantAccess } from "../../utils/tenant.ts";
 
 const createNotification = async (payload: any, actor: ActorContext) => {
-  const result = await prisma.notification.create({
-    data: {
-      ...payload,
-      
-    },
-  });
+  if (payload.userIds && Array.isArray(payload.userIds)) {
+    // Broadcast to multiple users
+    const notifications = payload.userIds.map((id: string) => ({
+      userId: id,
+      type: payload.type || "SYSTEM",
+      message: payload.message,
+    }));
+    await prisma.notification.createMany({ data: notifications });
+    
+    try {
+      const io = getIO();
+      for (const id of payload.userIds) {
+        io.to(id).emit("notifications-refresh");
+      }
+    } catch (error) {}
+    
+    return { count: notifications.length };
+  } else if (payload.sendToAll) {
+    // Broadcast to ALL users
+    const users = await prisma.user.findMany({ select: { id: true } });
+    const notifications = users.map((u: any) => ({
+      userId: u.id,
+      type: payload.type || "SYSTEM",
+      message: payload.message,
+    }));
+    await prisma.notification.createMany({ data: notifications });
+    
+    try {
+      const io = getIO();
+      io.emit("notifications-refresh"); // emit to everyone
+    } catch (error) {}
 
-  try {
-    const io = getIO();
-    if (payload.userId) {
-      io.to(payload.userId).emit("new-notification", result);
+    return { count: notifications.length };
+  } else {
+    // Single user creation (default behavior)
+    const result = await prisma.notification.create({
+      data: {
+        userId: payload.userId,
+        type: payload.type || "SYSTEM",
+        message: payload.message,
+      },
+    });
+
+    try {
+      const io = getIO();
+      if (payload.userId) {
+        io.to(payload.userId).emit("new-notification", result);
+      }
+    } catch (error) {
+      console.error("Socket emit error:", error);
     }
-  } catch (error) {
-    console.error("Socket emit error:", error);
-  }
 
-  return result;
+    return result;
+  }
 };
 
 const getAllNotifications = async (query: any, actor: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...queryFilter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...queryFilter } = query;
 
   const andCondition: Prisma.NotificationWhereInput[] = [];
   const { pageNumber, limitNumber, skip, sortOrderValue, sortByValue } =
@@ -51,7 +88,17 @@ const getAllNotifications = async (query: any, actor: ActorContext) => {
     AND: andCondition.length > 0 ? andCondition : undefined,
     ...queryFilter,
     isDeleted: false,
-      };
+  };
+
+  if (startDate || endDate) {
+    where.createdAt = {};
+    if (startDate) {
+      where.createdAt.gte = new Date(startDate);
+    }
+    if (endDate) {
+      where.createdAt.lte = new Date(endDate);
+    }
+  }
 
   const result = await prisma.notification.findMany({
     where,

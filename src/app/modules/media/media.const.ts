@@ -4,5 +4,4 @@ export const mediaFilterableFields = [
   "name",
   "slug",
   "status",
-  "parentId",
-];
+  "parentId", "startDate", "endDate"];

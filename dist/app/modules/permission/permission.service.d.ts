@@ -4,8 +4,8 @@ export declare const PermissionServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        roleId: string | null;
         module: string | null;
+        roleId: string | null;
         permissions: string[];
     }>;
     getAllPermission: (query: any, actor?: ActorContext) => Promise<{
@@ -22,8 +22,8 @@ export declare const PermissionServices: {
             createdAt: Date;
             updatedAt: Date;
             id: string;
-            roleId: string | null;
             module: string | null;
+            roleId: string | null;
             permissions: string[];
         })[];
         meta: {
@@ -45,24 +45,24 @@ export declare const PermissionServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        roleId: string | null;
         module: string | null;
+        roleId: string | null;
         permissions: string[];
     }>;
     getPermissionsByRole: (roleId: string, actor?: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        roleId: string | null;
         module: string | null;
+        roleId: string | null;
         permissions: string[];
     }[]>;
     updatePermission: (id: string, payload: any, actor?: ActorContext) => Promise<{
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        roleId: string | null;
         module: string | null;
+        roleId: string | null;
         permissions: string[];
     }>;
     deletePermission: (id: string, actor?: ActorContext) => Promise<{
@@ -75,8 +75,8 @@ export declare const PermissionServices: {
         createdAt: Date;
         updatedAt: Date;
         id: string;
-        roleId: string | null;
         module: string | null;
+        roleId: string | null;
         permissions: string[];
     }[]>;
 };

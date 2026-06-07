@@ -7,7 +7,6 @@ export const blogSearchableFields = [
   "title",
   "description",
   "excerpt",
-  "authorName",
   "slug",
   "tags",
 ];
@@ -23,5 +22,4 @@ export const blogFilterableFields = [
   "page",
   "limit",
   "sortBy",
-  "sortOrder",
-];
+  "sortOrder", "startDate", "endDate"];

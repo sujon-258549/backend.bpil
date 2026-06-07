@@ -8,5 +8,4 @@ export const folderFilterableFields = [
   "sortBy",
   "sortOrder",
   "limit",
-  "page",
-];
+  "page", "startDate", "endDate"];

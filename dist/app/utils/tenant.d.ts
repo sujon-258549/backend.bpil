@@ -1,6 +1,8 @@
 export type ActorContext = {
     userId: string;
     role: string | undefined;
+    email?: string | undefined;
+    name?: string | undefined;
 };
 export declare const isPlatformAdmin: (role: string | undefined) => boolean;
 export declare const tenantFilter: (actor: ActorContext) => {};

@@ -8,6 +8,7 @@ declare global {
         email: string;
         role: IUserRole;
         mobile?: string;
+        name?: string;
       };
     }
   }

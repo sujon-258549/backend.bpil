@@ -70,7 +70,7 @@ const buildFolderTree = (
 };
 
 const getAllFolders = async (query: any, actor: ActorContext) => {
-  const { searchTerm, page, limit, sortBy, sortOrder, ...filter } = query;
+  const { searchTerm, page, limit, sortBy, sortOrder, startDate, endDate, ...filter } = query;
 
   const andCondition: Prisma.FolderWhereInput[] = [];
 
@@ -92,6 +92,14 @@ const getAllFolders = async (query: any, actor: ActorContext) => {
 
   const { limitNumber, skip, sortOrderValue, sortByValue } =
     calculatePaginationOrSort(page, limit, sortBy, sortOrder);
+
+  if (startDate || endDate) {
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) dateFilter.lte = new Date(endDate as string);
+    andCondition.push({ createdAt: dateFilter } as any);
+  }
+
 
   const where: Prisma.FolderWhereInput = {
     AND: andCondition.length > 0 ? andCondition : undefined,
@@ -291,13 +299,23 @@ const getImageProxy = async (id: string) => {
     );
     
     if (response.data?.data?.url) {
-      return { url: response.data.data.url };
+      return { url: response.data.data.url as string };
     }
   } catch (error) {
     console.error("Failed to get signed URL from Zoom Digital API", error);
   }
   
   throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to generate image link");
+};
+
+const getImageDetails = async (id: string, actor?: ActorContext) => {
+  const image = await prisma.image.findUnique({
+    where: { id },
+  });
+  if (!image) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Image not found");
+  }
+  return image;
 };
 
 const updateImage = async (id: string, payload: { name: string }, actor?: ActorContext) => {
@@ -367,6 +385,7 @@ export const FolderServices = {
   deleteFolder,
   uploadFile,
   getImageProxy,
+  getImageDetails,
   updateImage,
   deleteImage,
 };

@@ -12,16 +12,16 @@ datasource db {
 // ============================================================================
 
 model AllRole {
-  id              String           @id @default(uuid())
-  role            String?
-  description     String?
-  isActive        Boolean          @default(true)
+  id          String  @id @default(uuid())
+  role        String?
+  description String?
+  isActive    Boolean @default(true)
   // Null = global role created by Platform Super Admin (e.g. SUPER_ADMIN).
   // Non-null = role created by a Branch Super Admin for their own tenant;
   // other tenants cannot see or use it.
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users           User[]
   rolePermissions RolePermission[]
@@ -42,7 +42,7 @@ model RolePermission {
 }
 
 model Department {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   name        String?
   description String?
@@ -50,7 +50,7 @@ model Department {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users       User[]
+  users User[]
 
   @@map("departments")
 }
@@ -63,22 +63,19 @@ model Department {
 // so the existing `branches` table and all its data are reused — only the
 // Prisma model name changed, not the database table.
 
-
-
-
 model Designation {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
-  slug        String?  @unique
+  slug        String? @unique
   description String?
   // Null = global designation created by Platform Super Admin. Non-null
   // = designation created by a Branch Super Admin for their own tenant.
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
 
-  users       User[]
+  users User[]
 }
 
 // ============================================================================
@@ -86,12 +83,12 @@ model Designation {
 // ============================================================================
 
 model User {
-  id            String       @id @default(uuid())
-  email         String?      @unique
+  id            String   @id @default(uuid())
+  email         String?  @unique
   password      String?
-  mobile        String?      @unique
+  mobile        String?  @unique
   roleId        String?
-  role          AllRole?     @relation(fields: [roleId], references: [id])
+  role          AllRole? @relation(fields: [roleId], references: [id])
   designationId String?
 
   // ---- Auth & device tracking ----
@@ -121,24 +118,25 @@ model User {
   loginTryTime  DateTime? @default(now())
 
   // ---- FKs ----
-  departmentId   String?
-
+  departmentId String?
 
   // ---- Timestamps ----
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // ---- Relations ----
-  address            Address?
-  profile            Profile?
-  workInfo           WorkInfo?
-  department         Department?        @relation(fields: [departmentId], references: [id])
+  address    Address?
+  profile    Profile?
+  workInfo   WorkInfo?
+  department Department? @relation(fields: [departmentId], references: [id])
 
-  comments           Comment[]
-  notifications      Notification[]
+  comments      Comment[]
+  notifications Notification[]
+  blogs         Blog[]         @relation("BlogAuthor")
 
-  loginHistories     LoginHistory[]
-  designation   Designation? @relation(fields: [designationId], references: [id])
+  loginHistories LoginHistory[]
+  actionLogs     ActionLog[]
+  designation    Designation?   @relation(fields: [designationId], references: [id])
 
   @@map("users")
 }
@@ -151,6 +149,7 @@ model LoginHistory {
   id     String       @id @default(uuid())
   userId String?
   status LoginStatus? @default(SUCCESS)
+  refreshToken String? @db.Text
 
   // ---- Device info ----
   deviceId       String?
@@ -221,21 +220,20 @@ model Address {
 }
 
 model WorkInfo {
-  id                 String        @id @default(uuid())
-  mobile             String?       @unique
-  subCategories      SubCategory[]
-  experience         String?
-
+  id            String        @id @default(uuid())
+  mobile        String?       @unique
+  experience    String?
+  workType      String?
 
   workStartTime      String?
   workTimeLimit      String?
   availableTime      String?
-  isDeleted          Boolean       @default(false)
-  isBlocked          Boolean       @default(false)
+  isDeleted          Boolean   @default(false)
+  isBlocked          Boolean   @default(false)
   passwordChangeTime DateTime?
-  passwordChanged    Boolean       @default(false)
-  verified           Boolean       @default(false)
-  user               User?         @relation(fields: [mobile], references: [mobile])
+  passwordChanged    Boolean   @default(false)
+  verified           Boolean   @default(false)
+  user               User?     @relation(fields: [mobile], references: [mobile])
 
   @@map("work_infos")
 }
@@ -244,19 +242,13 @@ model WorkInfo {
 // SUBSCRIPTION / PAYMENT
 // ============================================================================
 
-
-
-
-
 // SubscriptionPlan = reusable template the Platform Super Admin defines
 // once (e.g. "Pro Monthly", "Lifetime Enterprise"). Companies pick from
 // these when buying a subscription.
 
-
 // Subscription = a specific company's (Branch's) active billing window
 // against a Plan. Pure instance — all plan details (name, price, cycle,
 // currency) come from the related SubscriptionPlan, never duplicated here.
-
 
 // ============================================================================
 // MISC
@@ -273,15 +265,15 @@ model Otp {
 }
 
 model Category {
-  id            String        @id @default(uuid())
+  id String @id @default(uuid())
 
-  icon          String?
-  description   String?
-  name          String?
-  slug          String?       @unique
-  status        Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  icon        String?
+  description String?
+  name        String?
+  slug        String?  @unique
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   subCategories SubCategory[]
 
@@ -299,53 +291,50 @@ model SubCategory {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   category    Category?  @relation(fields: [categoryId], references: [id])
-  workInfos   WorkInfo[]
 
   @@map("sub_categories")
 }
 
-
-
 model Blog {
-  id          String    @id @default(uuid())
+  id String @id @default(uuid())
 
-  title       String?
-  slug        String?   @unique
-  content     String?
-  description String?
-  excerpt       String?
-  coverImageId  String?
-  coverImage    Image?    @relation("BlogCoverImage", fields: [coverImageId], references: [id])
-  thumbnailId   String?
-  thumbnail     Image?    @relation("BlogThumbnail", fields: [thumbnailId], references: [id])
-  tags          String[]  @default([])
-  category    String[]  @default([])
-  authorId    String?
-  authorName  String?
-  authorImage String?
-  isPublished Boolean   @default(false)
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
+  title        String?
+  slug         String?   @unique
+  content      String?
+  description  String?
+  excerpt      String?
+  coverImageId String?
+  coverImage   Image?    @relation("BlogCoverImage", fields: [coverImageId], references: [id])
+  thumbnailId  String?
+  thumbnail    Image?    @relation("BlogThumbnail", fields: [thumbnailId], references: [id])
+  tags         String[]  @default([])
+  category     String[]  @default([])
+  authorId     String?
+  author       User?     @relation("BlogAuthor", fields: [authorId], references: [id])
+  authorName   String?
+  authorImage  String?
+  isPublished  Boolean   @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("blogs")
 }
 
 model Folder {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  name      String?
-  slug      String?  @unique
-  parentId  String?
+  name         String?
+  slug         String?  @unique
+  parentId     String?
   status       Boolean  @default(true)
   zoomFolderId Int?
   createdAt    DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt    DateTime @updatedAt
 
-  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
-  children  Folder[] @relation("FolderToFolder")
-  images    Image[]
+  parent   Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  children Folder[] @relation("FolderToFolder")
+  images   Image[]
 
   @@map("folders")
 }
@@ -370,11 +359,11 @@ model Image {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
   userId    String?
   comment   String?
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean @default(false)
 
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -384,13 +373,13 @@ model Comment {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
   userId    String?
   type      String?
   message   String?
-  isRead    Boolean  @default(false)
-  isDeleted Boolean  @default(false)
+  isRead    Boolean @default(false)
+  isDeleted Boolean @default(false)
 
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -442,4 +431,45 @@ enum LoginStatus {
   FAILED
   LOGOUT
   EXPIRED
+}
+
+model ActionLog {
+  id            String   @id @default(uuid())
+  actorId       String?
+  actor         User?    @relation(fields: [actorId], references: [id])
+  action        String // CREATE, UPDATE, DELETE
+  module        String // MODULE NAME
+  recordId      String?
+  previousState Json?
+  newState      Json?
+  createdAt     DateTime @default(now())
+
+  @@map("action_logs")
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  message   String
+  stack     String?
+  route     String?
+  method    String?
+  createdAt DateTime @default(now())
+
+  @@map("error_logs")
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  services  String[] @default([])
+  company   String?
+  budget    String?
+  message   String
+  status    String   @default("UNREAD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contact_messages")
 }

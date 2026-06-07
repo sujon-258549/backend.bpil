@@ -6,8 +6,8 @@ export declare const BlogValidation: {
             content: z.ZodString;
             description: z.ZodOptional<z.ZodString>;
             excerpt: z.ZodOptional<z.ZodString>;
-            coverImageId: z.ZodOptional<z.ZodString>;
-            thumbnailId: z.ZodOptional<z.ZodString>;
+            coverImageId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            thumbnailId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
             tags: z.ZodOptional<z.ZodArray<z.ZodString>>;
             category: z.ZodOptional<z.ZodArray<z.ZodString>>;
             isPublished: z.ZodOptional<z.ZodBoolean>;
@@ -19,8 +19,8 @@ export declare const BlogValidation: {
             content: z.ZodOptional<z.ZodString>;
             description: z.ZodOptional<z.ZodString>;
             excerpt: z.ZodOptional<z.ZodString>;
-            coverImageId: z.ZodOptional<z.ZodString>;
-            thumbnailId: z.ZodOptional<z.ZodString>;
+            coverImageId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            thumbnailId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
             tags: z.ZodOptional<z.ZodArray<z.ZodString>>;
             category: z.ZodOptional<z.ZodArray<z.ZodString>>;
             isPublished: z.ZodOptional<z.ZodBoolean>;
