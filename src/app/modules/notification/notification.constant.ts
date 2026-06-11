@@ -7,4 +7,8 @@ export const notificationFilterableFields = [
   "isRead",
   "startDate",
   "endDate",
+  "page",
+  "limit",
+  "sortBy",
+  "sortOrder",
 ];

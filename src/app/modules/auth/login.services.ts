@@ -9,6 +9,8 @@ import { sendEmail, otpEmailTemplate } from "../../utils/sendEmail.ts";
 import { derivePermissionRows } from "../../utils/userPermissions.ts";
 import axios from "axios";
 
+
+
 const loginUser = async (payload: any) => {
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -30,7 +32,25 @@ const loginUser = async (payload: any) => {
   }
 
   if (user.isBlocked) {
-    throw new ApiError(status.UNAUTHORIZED, "🔍❓ User is blocked");
+    if (user.loginTryCount >= 5 && user.loginTryTime) {
+      const blockDuration = 15 * 60 * 1000; // 15 minutes
+      const now = new Date().getTime();
+      const blockedTime = new Date(user.loginTryTime).getTime();
+
+      if (now - blockedTime > blockDuration) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isBlocked: false, loginTryCount: 0, loginTryTime: null },
+        });
+        user.isBlocked = false;
+        user.loginTryCount = 0;
+      } else {
+        const remainingMinutes = Math.ceil((blockDuration - (now - blockedTime)) / 60000);
+        throw new ApiError(status.UNAUTHORIZED, `🔍❓ Your account is temporarily blocked due to too many failed login attempts. Please try again in ${remainingMinutes} minutes.`);
+      }
+    } else {
+      throw new ApiError(status.UNAUTHORIZED, "🔍❓ Your account has been blocked by an administrator.");
+    }
   }
 
   if (user.isDeleted) {
@@ -84,7 +104,7 @@ const loginUser = async (payload: any) => {
   else if (uaLower.includes("firefox")) browserName = "Firefox";
   else if (uaLower.includes("edg")) browserName = "Edge";
 
-  if (user.loginTryCount >= 5) {
+  if (user.loginTryCount >= 5 && user.role?.role !== "SUPER_ADMIN") {
     if (!user.isBlocked) {
       await prisma.user.update({
         where: { id: user.id },
@@ -134,7 +154,7 @@ const loginUser = async (payload: any) => {
       }
     });
 
-    if (updatedUser.loginTryCount >= 5) {
+    if (updatedUser.loginTryCount >= 5 && user.role?.role !== "SUPER_ADMIN") {
       await prisma.user.update({
         where: { id: user.id },
         data: { isBlocked: true },
@@ -155,7 +175,24 @@ const loginUser = async (payload: any) => {
     },
   });
 
-  // 1. Create LoginHistory first (without refreshToken initially)
+  let finalRefreshToken = user.refreshToken || "";
+  let isTokenValid = false;
+
+  if (finalRefreshToken) {
+    try {
+      const decoded = JwtHelpers.verifyToken(finalRefreshToken, config.refreshSecret as string);
+      const { iat } = decoded?.data || (decoded as any);
+      
+      // Check if password was changed after token issuance
+      if (!(user.passwordChangeTime && Math.floor(new Date(user.passwordChangeTime).getTime() / 1000) > iat)) {
+        isTokenValid = true;
+      }
+    } catch (e) {
+      isTokenValid = false;
+    }
+  }
+
+  // 1. Create LoginHistory first
   const loginHistory = await prisma.loginHistory.create({
     data: {
       userId: user.id,
@@ -165,7 +202,7 @@ const loginUser = async (payload: any) => {
       browser: browserName,
       deviceType: deviceTypeStr,
       isActive: true,
-      refreshToken: "", // Will update shortly
+      refreshToken: "", // Placeholder
       status: "SUCCESS",
       location: `${locationData.city}, ${locationData.country}`,
       city: locationData.city,
@@ -196,16 +233,25 @@ const loginUser = async (payload: any) => {
     config.accessSecret as string,
     config.accessExpire as string,
   );
-  const refreshToken = JwtHelpers.generateToken(
-    payloadData,
-    config.refreshSecret as string,
-    config.refreshExpire as string,
-  );
 
-  // Update history with the correct refreshToken
+  // If invalid or missing, generate a new one
+  if (!isTokenValid) {
+    finalRefreshToken = JwtHelpers.generateToken(
+      payloadData,
+      config.refreshSecret as string,
+      config.refreshExpire as string,
+    );
+    // Save to User table
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: finalRefreshToken }
+    });
+  }
+
+  // Update history with the active refreshToken
   await prisma.loginHistory.update({
     where: { id: loginHistory.id },
-    data: { refreshToken }
+    data: { refreshToken: finalRefreshToken }
   });
 
   // Send Email Notification
@@ -266,7 +312,7 @@ const loginUser = async (payload: any) => {
 
   return {
     accessToken,
-    refreshToken,
+    refreshToken: finalRefreshToken,
     user: {
       id: user.id,
       email: user.email,
@@ -292,6 +338,9 @@ const loginUser = async (payload: any) => {
     isLogin: true,
   };
 };
+
+
+
 
 const refreshToken = async (token: string) => {
   const decoded = JwtHelpers.verifyToken(token, config.refreshSecret as string);
@@ -361,20 +410,19 @@ const refreshToken = async (token: string) => {
     config.accessSecret as string,
     config.accessExpire as string,
   );
-  const newRefreshToken = JwtHelpers.generateToken(
-    payloadData,
-    config.refreshSecret as string,
-    config.refreshExpire as string,
-  );
+  
+  // Reuse the existing refresh token
+  const finalRefreshToken = token;
 
+  // We only update updatedAt on the session
   await prisma.loginHistory.update({
     where: { id: activeHistory.id },
-    data: { refreshToken: newRefreshToken, updatedAt: new Date() }
+    data: { updatedAt: new Date() }
   });
 
   return {
     accessToken,
-    refreshToken: newRefreshToken,
+    refreshToken: finalRefreshToken,
     user: {
       id: user.id,
       email: user.email,

@@ -138,6 +138,9 @@ model User {
   actionLogs     ActionLog[]
   designation    Designation?   @relation(fields: [designationId], references: [id])
 
+  dynamicContentsUpdated         DynamicContent[]        @relation("DynamicContentUpdatedBy")
+  dynamicContentHistoriesUpdated DynamicContentHistory[] @relation("DynamicContentHistoryUpdatedBy")
+
   @@map("users")
 }
 
@@ -146,10 +149,10 @@ model User {
 // ============================================================================
 
 model LoginHistory {
-  id     String       @id @default(uuid())
-  userId String?
-  status LoginStatus? @default(SUCCESS)
-  refreshToken String? @db.Text
+  id           String       @id @default(uuid())
+  userId       String?
+  status       LoginStatus? @default(SUCCESS)
+  refreshToken String?      @db.Text
 
   // ---- Device info ----
   deviceId       String?
@@ -220,10 +223,10 @@ model Address {
 }
 
 model WorkInfo {
-  id            String        @id @default(uuid())
-  mobile        String?       @unique
-  experience    String?
-  workType      String?
+  id         String  @id @default(uuid())
+  mobile     String? @unique
+  experience String?
+  workType   String?
 
   workStartTime      String?
   workTimeLimit      String?
@@ -281,16 +284,16 @@ model Category {
 }
 
 model SubCategory {
-  id          String     @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String?
   categoryId  String?
   description String?
   icon        String?
-  slug        String?    @unique
-  status      Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  category    Category?  @relation(fields: [categoryId], references: [id])
+  slug        String?   @unique
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
 
   @@map("sub_categories")
 }
@@ -340,20 +343,28 @@ model Folder {
 }
 
 model Image {
-  id                   String    @id @default(uuid())
+  id                   String           @id @default(uuid())
   name                 String?
   url                  String?
   folderId             String?
-  slug                 String?   @unique
-  status               Boolean   @default(true)
+  slug                 String?          @unique
+  status               Boolean          @default(true)
   zoomFileId           Int?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  folder               Folder?   @relation(fields: [folderId], references: [id])
-  profilePhotoProfiles Profile[] @relation("ProfilePhoto")
-  nidPhotoProfiles     Profile[] @relation("NidPhotos")
-  blogCoverImages      Blog[]    @relation("BlogCoverImage")
-  blogThumbnails       Blog[]    @relation("BlogThumbnail")
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  folder               Folder?          @relation(fields: [folderId], references: [id])
+  profilePhotoProfiles Profile[]        @relation("ProfilePhoto")
+  nidPhotoProfiles     Profile[]        @relation("NidPhotos")
+  blogCoverImages      Blog[]           @relation("BlogCoverImage")
+  blogThumbnails       Blog[]           @relation("BlogThumbnail")
+  dynamicContents      DynamicContent[]
+  productThumbnails    Product[]        @relation("ProductThumbnail")
+  productGalleries     Product[]        @relation("ProductGallery")
+  projectThumbnails    Project[]        @relation("ProjectThumbnail")
+  projectGalleries     Project[]        @relation("ProjectGallery")
+  videoPosters         Video[]          @relation("VideoPoster")
+  galleries            Gallery[]        @relation("GalleryImage")
+  teamMembers          TeamMember[]     @relation("TeamMemberImage")
 
   @@map("images")
 }
@@ -472,4 +483,168 @@ model ContactMessage {
   updatedAt DateTime @updatedAt
 
   @@map("contact_messages")
+}
+
+model DynamicContent {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  name        String?
+  value       Json?
+  imageId     String?
+  image       Image?   @relation(fields: [imageId], references: [id])
+  group       String   @default("general")
+  type        String   @default("text")
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Audit fields
+  updatedById String?
+  updatedBy   User?                   @relation("DynamicContentUpdatedBy", fields: [updatedById], references: [id])
+  histories   DynamicContentHistory[]
+
+  @@map("dynamic_contents")
+}
+
+model DynamicContentHistory {
+  id               String         @id @default(uuid())
+  dynamicContentId String
+  dynamicContent   DynamicContent @relation(fields: [dynamicContentId], references: [id])
+  oldValue         Json?
+  newValue         Json?
+  updatedById      String?
+  updatedBy        User?          @relation("DynamicContentHistoryUpdatedBy", fields: [updatedById], references: [id])
+  createdAt        DateTime       @default(now())
+
+  @@map("dynamic_content_histories")
+}
+
+// ============================================================================
+// PRODUCTS
+// ============================================================================
+
+model Product {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String? @unique
+  category String?
+  price    String?
+
+  thumbnailId String?
+  thumbnail   Image?  @relation("ProductThumbnail", fields: [thumbnailId], references: [id])
+  gallery     Image[] @relation("ProductGallery")
+  youtubeVideoIds String[] @default([])
+
+  shortDesc   String?  @db.Text
+  detailsDesc String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects    Project[]
+
+  @@map("products")
+}
+
+// ============================================================================
+// PROJECTS
+// ============================================================================
+
+enum ProjectStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+}
+
+model Project {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String? @unique
+  category String?
+  price    String?
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  thumbnailId String?
+  thumbnail   Image?  @relation("ProjectThumbnail", fields: [thumbnailId], references: [id])
+  gallery     Image[] @relation("ProjectGallery")
+  youtubeVideoIds String[] @default([])
+
+  status      ProjectStatus @default(ONGOING)
+
+  shortDesc   String?  @db.Text
+  detailsDesc String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("projects")
+}
+
+// ============================================================================
+// VIDEOS
+// ============================================================================
+
+model Video {
+  id          String   @id @default(uuid())
+  title       String
+  category    String?
+  duration    String?
+  posterId    String?
+  poster      Image?   @relation("VideoPoster", fields: [posterId], references: [id])
+  posterAlt   String?
+  youtubeId   String
+
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("videos")
+}
+
+// ============================================================================
+// GALLERY
+// ============================================================================
+
+model Gallery {
+  id          String   @id @default(uuid())
+  alt         String
+  category    String?
+  imageId     String
+  image       Image    @relation("GalleryImage", fields: [imageId], references: [id])
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("galleries")
+}
+
+// ============================================================================
+// TEAM MEMBERS
+// ============================================================================
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  mobile    String?
+  email     String?
+  bio       String?
+  serial    Int      @default(0)
+  imageId   String?
+  image     Image?   @relation("TeamMemberImage", fields: [imageId], references: [id])
+  
+  facebook  String?
+  twitter   String?
+  instagram String?
+  linkedin  String?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
 }
