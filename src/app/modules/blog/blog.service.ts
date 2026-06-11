@@ -11,8 +11,6 @@ import { logAction } from "../../utils/logger.service.ts";
 
 const createBlog = async (payload: any, user: any) => {
   const slugBase = payload.slug || slugCreate(payload.title);
-
-  console.log("user", user);
   
   let slug = slugBase;
   let counter = 1;

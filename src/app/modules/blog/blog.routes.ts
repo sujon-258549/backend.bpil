@@ -6,8 +6,8 @@ import requirePermission from "../../middleware/requirePermission.ts";
 const router = express.Router();
 
 // Anyone authenticated can read blogs
-router.get("/", auth(), BlogControllers.getAllBlog);
-router.get("/:id", auth(), BlogControllers.getBlogById);
+router.get("/",  BlogControllers.getAllBlog);
+router.get("/:id",  BlogControllers.getBlogById);
 
 // Create — requires blog.create permission
 router.post(
